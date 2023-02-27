@@ -1,7 +1,4 @@
 [![DOTNET](https://github.com/jimmy-mll/pokemon/actions/workflows/dotnet.yml/badge.svg)](https://github.com/jimmy-mll/pokemon/actions/workflows/dotnet.yml)
-[![CodeQL](https://github.com/jimmy-mll/pokemon/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/jimmy-mll/pokemon/actions/workflows/codeql-analysis.yml)
-[![Last Commit](https://img.shields.io/github/last-commit/jimmy-mll/pokemon)](https://github.com/jimmy-mll/pokemon/commits/development)
-[![License](https://img.shields.io/github/license/jimmy-mll/pokemon)](/LICENSE)
 
 # Pokemon
 
