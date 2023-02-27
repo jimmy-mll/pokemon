@@ -3,9 +3,9 @@ using Raylib_CsLo;
 
 namespace Pokemon.Engine.Graphics;
 
-public sealed class Rectangle
+public struct Rectangle
 {
-    public static Rectangle Zero => 
+    public static Rectangle Zero =>
         new(Vector2.Zero, Vector2.Zero);
     
     public static Rectangle Max =>
