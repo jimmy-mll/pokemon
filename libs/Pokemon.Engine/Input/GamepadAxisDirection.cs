@@ -2,9 +2,9 @@
 
 public enum GamepadAxisDirection
 {
-    None,
-    Left,
-    Right,
-    Up,
-    Down
+	None,
+	Left,
+	Right,
+	Up,
+	Down
 }

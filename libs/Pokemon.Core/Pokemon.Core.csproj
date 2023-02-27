@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Version>1.0.0</Version>
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Raylib-CsLo" Version="4.2.0.6" />
+        <PackageReference Include="Raylib-CsLo" Version="4.2.0.6"/>
     </ItemGroup>
 
 </Project>
