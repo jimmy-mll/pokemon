@@ -1,3 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Pokemon.Client;
 
-Console.WriteLine("Hello, World!");
+var game = new PokemonGame();
+game.Run();
