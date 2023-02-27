@@ -1,37 +1,21 @@
 ﻿using Pokemon.Engine.Primitives;
 using Raylib_CsLo;
-using System.Numerics;
 
 namespace Pokemon.Engine.Graphics;
 
 public class Window : IDisposable
 {
-    public int Width => _size.X;
-
-    public int Height => _size.Y;
+    public Vector2I Size
+    {
+        get => _size;
+        set => SetSize(value.X, value.Y);
+    }
 
     public Vector2I Position
     {
         get => _position;
         set => SetPosition(value.X, value.Y);
     }
-
-    public float Opacity
-    {
-        get => _opacity;
-        set => SetOpacity(value);
-    }
-
-    public bool IsFocused => Raylib.IsWindowFocused();
-
-    public bool IsFullscreen => Raylib.IsWindowFullscreen();
-
-    public bool IsHidden => Raylib.IsWindowHidden();
-
-    public bool IsMaximized => Raylib.IsWindowMaximized();
-
-    public bool IsMinimized => Raylib.IsWindowMinimized();
-
 
     public string Title
     {
@@ -42,6 +26,26 @@ public class Window : IDisposable
             Raylib.SetWindowTitle(value);
         }
     }
+
+    public float Opacity
+    {
+        get => _opacity;
+        set => SetOpacity(value);
+    }
+
+    public int Width => _size.X;
+
+    public int Height => _size.Y;
+
+    public bool IsFocused => Raylib.IsWindowFocused();
+
+    public bool IsFullscreen => Raylib.IsWindowFullscreen();
+
+    public bool IsHidden => Raylib.IsWindowHidden();
+
+    public bool IsMaximized => Raylib.IsWindowMaximized();
+
+    public bool IsMinimized => Raylib.IsWindowMinimized();
 
     private float _opacity;
     private string _title;
