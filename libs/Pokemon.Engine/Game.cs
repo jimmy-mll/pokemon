@@ -8,9 +8,23 @@ namespace Pokemon.Engine;
 
 public abstract class Game : IDisposable
 {
+    protected int FPS => Raylib.GetFPS();
+    protected bool ShowFPS { get; set; }
+
+    protected int TargetFPS
+    {
+        get => _targetFPS;
+        set
+        {
+            _targetFPS = value;
+            Raylib.SetTargetFPS(value);
+        }
+    }
+
     public Window Window => _window;
 
     private float _lastDt;
+    private int _targetFPS;
     private bool _isRunning;
     private Window _window = null!;
 
@@ -39,6 +53,8 @@ public abstract class Game : IDisposable
             Raylib.BeginDrawing();
 
             Draw();
+
+            if (ShowFPS) Raylib.DrawFPS(20, 20);
 
             Raylib.EndDrawing();
 
