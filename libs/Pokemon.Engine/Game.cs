@@ -1,41 +1,47 @@
-﻿using Raylib_CsLo;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
+using Raylib_CsLo;
 
 namespace Pokemon.Engine;
 
 public abstract class Game : IDisposable
 {
-    private float _lastDt;
+	private float _lastDt;
 
-    protected virtual void Update(float dt) { }
-    protected virtual void Draw() { }
+	public void Dispose()
+	{
+	}
 
-    public void Run()
-    {
-        Raylib.InitWindow(1280, 720, Assembly.GetExecutingAssembly().FullName ?? "Game");
+	protected virtual void Update(float dt)
+	{
+	}
 
-        while (!Raylib.WindowShouldClose())
-        {
-            var sw = Stopwatch.StartNew();
+	protected virtual void Draw()
+	{
+	}
 
-            Update(_lastDt);
+	public void Run()
+	{
+		Raylib.InitWindow(1280, 720, Assembly.GetExecutingAssembly().FullName ?? "Game");
 
-            Raylib.BeginDrawing();
+		var sw = new Stopwatch();
 
-            Draw();
+		while (!Raylib.WindowShouldClose())
+		{
+			sw.Start();
 
-            Raylib.EndDrawing();
+			Update(_lastDt);
 
-            sw.Stop();
-            _lastDt = (float)sw.Elapsed.TotalSeconds;
-        }
+			Raylib.BeginDrawing();
 
-        Raylib.CloseWindow();
-    }
+			Draw();
 
-    public void Dispose()
-    {
-        
-    }
+			Raylib.EndDrawing();
+
+			sw.Stop();
+			_lastDt = (float)sw.Elapsed.TotalSeconds;
+		}
+
+		Raylib.CloseWindow();
+	}
 }
