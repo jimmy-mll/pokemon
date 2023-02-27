@@ -1,19 +1,31 @@
-﻿using Raylib_CsLo;
+﻿using Pokemon.Engine.Graphics;
+using Raylib_CsLo;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Pokemon.Engine;
 
 public abstract class Game : IDisposable
 {
-    private float _lastDt;
+    public Window Window => _window;
 
+    private float _lastDt;
+    private bool _isRunning;
+    private Window _window = null!;
+
+    protected virtual void Initialize() { }
     protected virtual void Update(float dt) { }
     protected virtual void Draw() { }
 
     public void Run()
     {
-        Raylib.InitWindow(1280, 720, Assembly.GetExecutingAssembly().FullName ?? "Game");
+        if (_isRunning)
+            throw new Exception("Couldn't run the game twice.");
+
+        _window = new Window(Assembly.GetExecutingAssembly().FullName ?? "Game");
+
+        Initialize();
 
         var sw = Stopwatch.StartNew();
 
@@ -39,6 +51,6 @@ public abstract class Game : IDisposable
 
     public void Dispose()
     {
-        
+        Window.Dispose();
     }
 }
