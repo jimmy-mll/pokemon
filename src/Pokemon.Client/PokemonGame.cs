@@ -5,10 +5,10 @@ namespace Pokemon.Client;
 
 public class PokemonGame : Game
 {
-    protected override void Draw()
-    {
-        Raylib.ClearBackground(Raylib.RED);
+	protected override void Draw()
+	{
+		Raylib.ClearBackground(Raylib.RED);
 
-        base.Draw();
-    }
+		base.Draw();
+	}
 }

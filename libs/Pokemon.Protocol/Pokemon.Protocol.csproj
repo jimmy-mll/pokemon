@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Pokemon.Engine\Pokemon.Engine.csproj" />
+        <ProjectReference Include="..\Pokemon.Engine\Pokemon.Engine.csproj"/>
     </ItemGroup>
 
 </Project>

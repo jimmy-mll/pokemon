@@ -4,6 +4,6 @@ namespace Pokemon.Engine.Input;
 
 public static class Mouse
 {
-    public static MouseState GetState() =>
-        new(Raylib.GetMousePosition(), Raylib.GetMouseWheelMoveV(), Raylib.GetGestureDetected_(), Raylib.GetMouseDelta());
+	public static MouseState GetState() =>
+		new(Raylib.GetMousePosition(), Raylib.GetMouseWheelMoveV(), Raylib.GetGestureDetected_(), Raylib.GetMouseDelta());
 }
