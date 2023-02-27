@@ -15,9 +15,12 @@ public abstract class Game : IDisposable
     {
         Raylib.InitWindow(1280, 720, Assembly.GetExecutingAssembly().FullName ?? "Game");
 
+        var sw = Stopwatch.StartNew();
+
         while (!Raylib.WindowShouldClose())
         {
-            var sw = Stopwatch.StartNew();
+            sw.Reset();
+            sw.Start();
 
             Update(_lastDt);
 
