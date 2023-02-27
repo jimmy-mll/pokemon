@@ -33,10 +33,6 @@ public class Window : IDisposable
         set => SetOpacity(value);
     }
 
-    public int Width => _size.X;
-
-    public int Height => _size.Y;
-
     public bool IsFocused => Raylib.IsWindowFocused();
 
     public bool IsFullscreen => Raylib.IsWindowFullscreen();
@@ -60,7 +56,7 @@ public class Window : IDisposable
         size ??= new Vector2I(1280, 720);
         SetSize(size.Value.X, size.Value.Y);
 
-        Raylib.InitWindow(Width, Height, _title);
+        Raylib.InitWindow(Size.X, Size.Y, _title);
     }
 
     ~Window()
