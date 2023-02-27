@@ -1,7 +1,7 @@
 {
   "changelogAll": true,
   "changelog": {
-    "header": "## Bolt Changelog",
+    "header": "## Pokemon Changelog",
     "sections": [
       {
         "type": "feat",
