@@ -8,11 +8,11 @@ using Pokemon.Core.Network.Metadata;
 
 namespace Pokemon.Core.Network.Transport;
 
-public sealed class PokemonClient : IAsyncDisposable
+public sealed class PokemonClient : INetworkPeer, IAsyncDisposable
 {
+	private IDuplexPipe _pipe = null!;
 	private readonly Socket _socket;
 	private readonly CancellationTokenSource _cts;
-	private readonly IDuplexPipe _pipe;
 	private readonly IMessageParser _messageParser;
 	private readonly IMessageDispatcher _messageDispatcher;
 
@@ -38,7 +38,6 @@ public sealed class PokemonClient : IAsyncDisposable
 		_messageParser = messageParser;
 		_messageDispatcher = messageDispatcher;
 		_cts = new CancellationTokenSource();
-		_pipe = DuplexPipe.Create(_socket);
 	}
 
 	/// <summary>Connects the session to the specified endpoint.</summary>
@@ -47,7 +46,9 @@ public sealed class PokemonClient : IAsyncDisposable
 		try
 		{
 			await _socket.ConnectAsync(endPoint, _cts.Token).ConfigureAwait(false);
-		}
+
+            _pipe = DuplexPipe.Create(_socket);
+        }
 		catch (SocketException e)
 		{
 			throw new InvalidOperationException("Failed to connect to the remote endpoint", e);
