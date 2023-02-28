@@ -1,7 +1,6 @@
 ﻿using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
-using Microsoft.Extensions.Logging;
 using Pokemon.Core.Network.Dispatching;
 using Pokemon.Core.Network.Framing;
 using Pokemon.Core.Network.Infrastructure;
@@ -9,6 +8,7 @@ using Pokemon.Core.Network.Metadata;
 
 namespace Pokemon.Core.Network.Transport;
 
+/// <summary>A network session that represents a connection to a remote endpoint.</summary>
 public sealed class PokemonSession : IAsyncDisposable
 {
 	private readonly Socket _socket;
