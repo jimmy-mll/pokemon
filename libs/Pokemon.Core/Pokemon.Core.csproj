@@ -4,10 +4,15 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <DefineConstants></DefineConstants>
     </PropertyGroup>
     
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Serilog.AspNetCore" Version="6.1.1-dev-00295" />
     </ItemGroup>
 
 </Project>
