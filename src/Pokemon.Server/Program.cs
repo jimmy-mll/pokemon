@@ -1,13 +1,22 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Pokemon.Core.Extensions;
-using Pokemon.Core.Network.Metadata.STC;
 using Pokemon.Core.Network.Transport;
 using System.Net;
+using Pokemon.Core.Network.Dispatching;
+using Pokemon.Core.Network.Factory;
+using Pokemon.Protocol.Messages.Player;
+using Pokemon.Server.Handlers.Player;
 
 var servicesCollection = new ServiceCollection();
-servicesCollection.AddNetwork<PokemonServer>();
+servicesCollection
+    .AddSingleton<PlayerHandler>()
+    .AddNetwork<PokemonServer>();
 
 var services = servicesCollection.BuildServiceProvider();
+
+services.GetRequiredService<IMessageFactory>().Initialize(typeof(PlayerSpawnMessage).Assembly);
+services.GetRequiredService<IMessageDispatcher>().InitializeServer(typeof(PlayerHandler).Assembly);
+
 var server = services.GetRequiredService<PokemonServer>();
 
 server.SessionConnected += Server_SessionConnected;
@@ -25,5 +34,7 @@ Task Server_SessionDisconnected(PokemonSession session)
 async Task Server_SessionConnected(PokemonSession session)
 {
     Console.WriteLine($"New client connected: {session.RemoteEndPoint}");
-    await session.SendAsync(new NewPlayerSpawnedMessage(0, 200, 200)).ConfigureAwait(false);
+    await session.SendAsync(new PlayerSpawnRequestMessage()).ConfigureAwait(false);
 }
+
+Console.ReadKey();

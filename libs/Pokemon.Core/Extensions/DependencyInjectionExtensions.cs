@@ -10,9 +10,9 @@ public static class DependencyInjectionExtensions
 {
     public static void AddNetwork<TPeer>(this IServiceCollection services) where TPeer : class, INetworkPeer
     {
-        services.AddScoped<IMessageParser, MessageParser>();
-        services.AddScoped<IMessageFactory, MessageFactory>();
-        services.AddScoped<IMessageDispatcher, MessageDispatcher>();
+        services.AddSingleton<IMessageParser, MessageParser>();
+        services.AddSingleton<IMessageFactory, MessageFactory>();
+        services.AddSingleton<IMessageDispatcher, MessageDispatcher>();
 
         services.AddSingleton<TPeer>();
     }

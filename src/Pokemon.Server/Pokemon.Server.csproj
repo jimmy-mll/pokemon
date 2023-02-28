@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\libs\Pokemon.Protocol\Pokemon.Protocol.csproj"/>
+        <ProjectReference Include="..\..\libs\Pokemon.Protocol\Pokemon.Protocol.csproj" />
     </ItemGroup>
 
 </Project>

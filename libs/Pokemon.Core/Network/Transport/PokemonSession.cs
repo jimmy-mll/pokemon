@@ -67,7 +67,7 @@ public sealed class PokemonSession : IAsyncDisposable
 
 				try
 				{
-					while (_messageParser.TryDecodeMessage(buffer, out var message))
+					if (_messageParser.TryDecodeMessage(buffer, out var message))
 					{
 						await _messageDispatcher.DispatchSessionAsync(this, message).ConfigureAwait(false);
 					}

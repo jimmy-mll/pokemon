@@ -15,7 +15,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
 	private static readonly ILogger Logger = Log.ForContext<MessageDispatcher>();
 
 	private readonly ConcurrentDictionary<ushort, (Type Type, Func<object, PokemonSession, PokemonMessage, Task> Delegate)> _sessionHandlers;
-	private readonly ConcurrentDictionary<ushort, Func<PokemonClient, PokemonMessage, Task>> _clientHandlers;
+	private readonly ConcurrentDictionary<ushort, (Type Type, Func<object, PokemonClient, PokemonMessage, Task> Delegate)> _clientHandlers;
 	private readonly IServiceProvider _provider;
 	
 	public MessageDispatcher() : this(NullServiceProvider.Instance) { }
@@ -24,7 +24,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
 	{
 		_provider = provider;
 		_sessionHandlers = new ConcurrentDictionary<ushort, (Type Type, Func<object, PokemonSession, PokemonMessage, Task> Delegate)>();
-		_clientHandlers = new ConcurrentDictionary<ushort, Func<PokemonClient, PokemonMessage, Task>>();
+		_clientHandlers = new ConcurrentDictionary<ushort, (Type Type, Func<object, PokemonClient, PokemonMessage, Task> Delegate)>();
 	}
 
 	/// <inheritdoc />
@@ -41,11 +41,8 @@ public sealed class MessageDispatcher : IMessageDispatcher
 			if (parameters.Length is not 2)
 				throw new InvalidOperationException("Message handler must have exactly two parameters.");
 			
-			if (parameters[0].ParameterType != typeof(PokemonClient))
+			if (parameters[0].ParameterType != typeof(PokemonSession))
 				throw new InvalidOperationException("First parameter of message handler must be of type PokemonClient.");
-			
-			if (parameters[1].ParameterType != typeof(PokemonMessage))
-				throw new InvalidOperationException("Second parameter of message handler must be of type PokemonMessage.");
 
 			var messageId = Convert.ToUInt16(parameters[1].ParameterType.GetField("Identifier")?.GetValue(null));
 
@@ -80,11 +77,11 @@ public sealed class MessageDispatcher : IMessageDispatcher
 	/// <inheritdoc />
 	public void InitializeClient(Assembly assembly)
 	{
-		foreach (var method in from type in assembly.GetTypes()
-		         from method in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+		foreach (var (type, method) in from type in assembly.GetTypes()
+		         from method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
 		         let attribute = method.GetCustomAttribute<MessageHandlerAttribute>()
 		         where attribute is not null
-		         select method)
+		         select (type, method))
 		{
 			var parameters = method.GetParameters();
 			
@@ -94,14 +91,11 @@ public sealed class MessageDispatcher : IMessageDispatcher
 			if (parameters[0].ParameterType != typeof(PokemonClient))
 				throw new InvalidOperationException("First parameter of message handler must be of type PokemonClient.");
 			
-			if (parameters[1].ParameterType != typeof(PokemonMessage))
-				throw new InvalidOperationException("Second parameter of message handler must be of type PokemonMessage.");
-
 			var messageId = Convert.ToUInt16(parameters[1].ParameterType.GetField("Identifier")?.GetValue(null));
 
-			var handler = method.CreateDelegateV2<PokemonClient, PokemonMessage, Task>();
+			var handler = method.CreateDelegate<PokemonClient, PokemonMessage, Task>();
 			
-			if (!_clientHandlers.TryAdd(messageId, handler))
+			if (!_clientHandlers.TryAdd(messageId, (type, handler)))
 				throw new InvalidOperationException($"Message handler for message {messageId} already exists.");
 		}
 	}
@@ -117,13 +111,13 @@ public sealed class MessageDispatcher : IMessageDispatcher
 
 		try
 		{
-			await handler(client, message).ConfigureAwait(false);
+			await handler.Delegate(_provider.GetRequiredService(handler.Type), client, message).ConfigureAwait(false);
 			
-			Logger.Information("Dispatched message {MessageId} to {Handler}", message.MessageId, handler.Method.Name);
+			Logger.Information("Dispatched message {MessageId} to {Handler}", message.MessageId, handler.Delegate.Method.Name);
 		}
 		catch (TargetInvocationException e)
 		{
-			Logger.Error(e, "An exception occurred while dispatching message {MessageId} to {Handler}", message.MessageId, handler.Method.Name);
+			Logger.Error(e, "An exception occurred while dispatching message {MessageId} to {Handler}", message.MessageId, handler.Delegate.Method.Name);
 		}
 	}
 }

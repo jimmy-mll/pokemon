@@ -75,7 +75,7 @@ public sealed class PokemonClient : INetworkPeer, IAsyncDisposable
 
 				try
 				{
-					while (_messageParser.TryDecodeMessage(buffer, out var message))
+					if (_messageParser.TryDecodeMessage(buffer, out var message))
 						await _messageDispatcher.DispatchClientAsync(this, message).ConfigureAwait(false);
 
 					if (readResult.IsCompleted)

@@ -28,7 +28,10 @@ public abstract class GameEngine : Game
         Services = services.BuildServiceProvider();
     }
 
-    protected virtual void OnConfiguration(IServiceCollection services) { }
+    protected virtual void OnConfiguration(IServiceCollection services)
+    {
+        
+    }
 
     private static Lazy<GameEngine> _lazy;
     private readonly GraphicsDeviceManager _graphics;
