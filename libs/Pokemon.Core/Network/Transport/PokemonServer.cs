@@ -6,7 +6,7 @@ using Pokemon.Core.Network.Framing;
 namespace Pokemon.Core.Network.Transport;
 
 /// <summary>Represents a tcp server that can be used to listen for incoming connections.</summary>
-public sealed class PokemonServer
+public sealed class PokemonServer : INetworkPeer
 {
 	private readonly Socket _socket;
 	private readonly CancellationTokenSource _cts;
