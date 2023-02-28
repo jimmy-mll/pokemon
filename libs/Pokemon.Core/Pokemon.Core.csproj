@@ -4,19 +4,18 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <DefineConstants></DefineConstants>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <PackageReference Include="Serilog.AspNetCore" Version="6.1.1-dev-00295" />
     </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="Network\Metadata\STS\" />
-    </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Threading" />
+    </ItemGroup>
+    
 </Project>

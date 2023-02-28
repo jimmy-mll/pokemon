@@ -7,6 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Folder Include="Datacenter" />
+      <Folder Include="Enums" />
+      <Folder Include="Types" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Pokemon.Core\Pokemon.Core.csproj" />
     </ItemGroup>
 

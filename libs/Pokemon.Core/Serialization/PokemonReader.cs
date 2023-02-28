@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Buffers.Binary;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -87,6 +88,15 @@ public sealed class PokemonReader
 
 	public string ReadBigString() =>
 		ReadStringBytes(ReadInt32());
+	
+	public Vector2 ReadVector2() =>
+		new(ReadFloat(), ReadFloat());
+	
+	public Vector3 ReadVector3() =>
+		new(ReadFloat(), ReadFloat(), ReadFloat());
+	
+	public Vector4 ReadVector4() =>
+		new(ReadFloat(), ReadFloat(), ReadFloat(), ReadFloat());
 
 	public void Seek(int offset, SeekOrigin origin) =>
 		Position = origin switch

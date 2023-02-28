@@ -7,13 +7,14 @@ using Pokemon.Core.Network.Metadata;
 namespace Pokemon.Core.Network.Factory;
 
 /// <inheritdoc />
-public sealed class MessageFactory : IMessageFactory
+public class MessageFactory : IMessageFactory
 {
 	private static readonly Type MessageType = typeof(PokemonMessage);
 	
 	private readonly ConcurrentDictionary<ushort, Func<PokemonMessage>> _messages;
 	private readonly ConcurrentDictionary<ushort, string> _messageNames;
 	
+	/// <summary>Initializes a new instance of the <see cref="MessageFactory"/> class.</summary>
 	public MessageFactory()
 	{
 		_messages = new ConcurrentDictionary<ushort, Func<PokemonMessage>>();
@@ -48,4 +49,8 @@ public sealed class MessageFactory : IMessageFactory
 		message = factory();
 		return true;
 	}
+
+	/// <inheritdoc />
+	public bool TryGetMessageName(ushort messageId, [NotNullWhen(true)] out string? messageName) =>
+		_messageNames.TryGetValue(messageId, out messageName);
 }

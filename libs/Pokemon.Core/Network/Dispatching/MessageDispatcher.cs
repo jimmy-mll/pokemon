@@ -1,129 +1,134 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Pokemon.Core.Extensions;
-using Pokemon.Core.Network.Infrastructure;
+using Microsoft.Extensions.Logging;
+using Pokemon.Core.Network.Dispatching.Handlers;
+using Pokemon.Core.Network.Factory;
 using Pokemon.Core.Network.Metadata;
 using Pokemon.Core.Network.Transport;
-using Serilog;
 
 namespace Pokemon.Core.Network.Dispatching;
 
 /// <inheritdoc />
-public sealed class MessageDispatcher : IMessageDispatcher
+public class MessageDispatcher : IMessageDispatcher
 {
-	private static readonly ILogger Logger = Log.ForContext<MessageDispatcher>();
-
-	private readonly ConcurrentDictionary<ushort, (Type Type, Func<object, PokemonSession, PokemonMessage, Task> Delegate)> _sessionHandlers;
-	private readonly ConcurrentDictionary<ushort, Func<PokemonClient, PokemonMessage, Task>> _clientHandlers;
+	private static readonly Type SessionHandlerType = typeof(SessionHandler<,>);
+	private static readonly Type ClientHandlerType = typeof(ClientHandler<,>);
+	
+	private readonly ConcurrentDictionary<ushort, Type> _sessionHandlers;
+	private readonly ConcurrentDictionary<ushort, Type> _clientHandlers;
 	private readonly IServiceProvider _provider;
-	
-	public MessageDispatcher() : this(NullServiceProvider.Instance) { }
-	
-	public MessageDispatcher(IServiceProvider provider)
+	private readonly ILogger<MessageDispatcher> _logger;
+	private readonly IMessageFactory _messageFactory;
+
+	/// <summary>Initializes a new instance of the <see cref="MessageDispatcher"/> class.</summary>
+	/// <param name="provider">The service provider.</param>
+	/// <param name="logger">The logger.</param>
+	/// <param name="messageFactory">The message factory.</param>
+	public MessageDispatcher(IServiceProvider provider, ILogger<MessageDispatcher> logger, IMessageFactory messageFactory)
 	{
 		_provider = provider;
-		_sessionHandlers = new ConcurrentDictionary<ushort, (Type Type, Func<object, PokemonSession, PokemonMessage, Task> Delegate)>();
-		_clientHandlers = new ConcurrentDictionary<ushort, Func<PokemonClient, PokemonMessage, Task>>();
-	}
-
-	/// <inheritdoc />
-	public void InitializeServer(Assembly assembly)
-	{
-		foreach (var (type, method) in from type in assembly.GetTypes()
-		         from method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-		         let attribute = method.GetCustomAttribute<MessageHandlerAttribute>()
-		         where attribute is not null
-		         select (type, method))
-		{
-			var parameters = method.GetParameters();
-			
-			if (parameters.Length is not 2)
-				throw new InvalidOperationException("Message handler must have exactly two parameters.");
-			
-			if (parameters[0].ParameterType != typeof(PokemonClient))
-				throw new InvalidOperationException("First parameter of message handler must be of type PokemonClient.");
-			
-			if (parameters[1].ParameterType != typeof(PokemonMessage))
-				throw new InvalidOperationException("Second parameter of message handler must be of type PokemonMessage.");
-
-			var messageId = Convert.ToUInt16(parameters[1].ParameterType.GetField("Identifier")?.GetValue(null));
-
-			var handler = method.CreateDelegate<PokemonSession, PokemonMessage, Task>();
-			
-			if (!_sessionHandlers.TryAdd(messageId, (type, handler)))
-				throw new InvalidOperationException($"Message handler for message {messageId} already exists.");
-		}
-	}
-
-	/// <inheritdoc />
-	public async Task DispatchSessionAsync(PokemonSession session, PokemonMessage message)
-	{
-		if (!_sessionHandlers.TryGetValue(message.MessageId, out var handler))
-		{
-			Logger.Warning("No handler found for message {MessageId}", message.MessageId);
-			return;
-		}
-
-		try
-		{
-			await handler.Delegate(_provider.GetRequiredService(handler.Type), session, message).ConfigureAwait(false);
-			
-			Logger.Information("Dispatched message {MessageId} to {Handler}", message.MessageId, handler.Delegate.Method.Name);
-		}
-		catch (TargetInvocationException e)
-		{
-			Logger.Error(e, "An exception occurred while dispatching message {MessageId} to {Handler}", message.MessageId, handler.Delegate.Method.Name);
-		}
+		_logger = logger;
+		_messageFactory = messageFactory;
+		_sessionHandlers = new ConcurrentDictionary<ushort, Type>();
+		_clientHandlers = new ConcurrentDictionary<ushort, Type>();
 	}
 	
 	/// <inheritdoc />
 	public void InitializeClient(Assembly assembly)
 	{
-		foreach (var method in from type in assembly.GetTypes()
-		         from method in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
-		         let attribute = method.GetCustomAttribute<MessageHandlerAttribute>()
-		         where attribute is not null
-		         select method)
+		foreach (var type in from type in assembly.GetTypes()
+		         where type.BaseType is not null &&
+		               type.BaseType.IsGenericType &&
+		               type.BaseType.GetGenericTypeDefinition() == ClientHandlerType
+		         select type)
 		{
-			var parameters = method.GetParameters();
-			
-			if (parameters.Length is not 2)
-				throw new InvalidOperationException("Message handler must have exactly two parameters.");
-			
-			if (parameters[0].ParameterType != typeof(PokemonClient))
-				throw new InvalidOperationException("First parameter of message handler must be of type PokemonClient.");
-			
-			if (parameters[1].ParameterType != typeof(PokemonMessage))
-				throw new InvalidOperationException("Second parameter of message handler must be of type PokemonMessage.");
+			var parameters = type.BaseType!.GetGenericArguments();
 
-			var messageId = Convert.ToUInt16(parameters[1].ParameterType.GetField("Identifier")?.GetValue(null));
-
-			var handler = method.CreateDelegateV2<PokemonClient, PokemonMessage, Task>();
+			var messageType = parameters[1];
 			
-			if (!_clientHandlers.TryAdd(messageId, handler))
-				throw new InvalidOperationException($"Message handler for message {messageId} already exists.");
+			var messageId = Convert.ToUInt16(messageType.GetField("Identifier")?.GetValue(null));
+
+			if (_clientHandlers.TryAdd(messageId, type))
+				_logger.LogWarning("Duplicate message handler for message {MessageName} in {TypeName}", messageType.Name, type.Name);
 		}
 	}
 
 	/// <inheritdoc />
-	public async Task DispatchClientAsync(PokemonClient client, PokemonMessage message)
+	public void InitializeServer(Assembly assembly)
 	{
-		if (!_clientHandlers.TryGetValue(message.MessageId, out var handler))
+		foreach (var type in from type in assembly.GetTypes()
+		         where type.BaseType is not null &&
+		               type.BaseType.IsGenericType &&
+		               type.BaseType.GetGenericTypeDefinition() == SessionHandlerType
+		         select type)
 		{
-			Logger.Warning("No handler found for message {MessageId}", message.MessageId);
+			var parameters = type.BaseType!.GetGenericArguments();
+
+			var messageType = parameters[1];
+			
+			var messageId = Convert.ToUInt16(messageType.GetField("Identifier")?.GetValue(null));
+
+			if (_sessionHandlers.TryAdd(messageId, type))
+				_logger.LogWarning("Duplicate message handler for message {MessageName} in {TypeName}", messageType.Name, type.Name);
+		}
+	}
+
+	/// <inheritdoc />
+	public async Task DispatchServerAsync(BaseSession session, PokemonMessage message)
+	{
+		if (_messageFactory.TryGetMessageName(message.MessageId, out var messageName))
+		{
+			_logger.LogWarning("Unknown message with id {MessageName}", message.MessageId);
+			return;
+		}
+		
+		if (!_sessionHandlers.TryGetValue(message.MessageId, out var type))
+		{
+			_logger.LogWarning("No handler found for message {MessageName}", message.MessageId);
 			return;
 		}
 
+		var handler = (SessionHandler)_provider.GetRequiredService(type);
+
 		try
 		{
-			await handler(client, message).ConfigureAwait(false);
+			await handler.Delegate(session, message).ConfigureAwait(false);
 			
-			Logger.Information("Dispatched message {MessageId} to {Handler}", message.MessageId, handler.Method.Name);
+			_logger.LogInformation("Dispatched message {MessageName} to {HandlerName}", messageName, type.Name);
 		}
 		catch (TargetInvocationException e)
 		{
-			Logger.Error(e, "An exception occurred while dispatching message {MessageId} to {Handler}", message.MessageId, handler.Method.Name);
+			_logger.LogError(e, "An exception occurred while dispatching message {MessageName} to {HandlerName}", messageName, type.Name);
+		}
+	}
+
+	/// <inheritdoc />
+	public async Task DispatchClientAsync(BaseClient client, PokemonMessage message)
+	{
+		if (_messageFactory.TryGetMessageName(message.MessageId, out var messageName))
+		{
+			_logger.LogWarning("Unknown message with id {MessageName}", message.MessageId);
+			return;
+		}
+		
+		if (!_sessionHandlers.TryGetValue(message.MessageId, out var type))
+		{
+			_logger.LogWarning("No handler found for message {MessageName}", message.MessageId);
+			return;
+		}
+
+		var handler = (ClientHandler)_provider.GetRequiredService(type);
+
+		try
+		{
+			await handler.Delegate(client, message).ConfigureAwait(false);
+			
+			_logger.LogInformation("Dispatched message {MessageName} to {HandlerName}", messageName, type.Name);
+		}
+		catch (TargetInvocationException e)
+		{
+			_logger.LogError(e, "An exception occurred while dispatching message {MessageName} to {HandlerName}", messageName, type.Name);
 		}
 	}
 }

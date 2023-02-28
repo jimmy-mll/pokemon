@@ -8,81 +8,73 @@ using Pokemon.Core.Network.Metadata;
 
 namespace Pokemon.Core.Network.Transport;
 
-public sealed class PokemonClient : INetworkPeer, IAsyncDisposable
+/// <summary>A network session that represents a connection to a remote endpoint.</summary>
+public abstract class BaseSession : IAsyncDisposable
 {
-	private IDuplexPipe _pipe = null!;
 	private readonly Socket _socket;
 	private readonly CancellationTokenSource _cts;
+	private readonly IDuplexPipe _pipe;
 	private readonly IMessageParser _messageParser;
 	private readonly IMessageDispatcher _messageDispatcher;
 
 	private bool _disposed;
+	private string? _sessionId;
 
-	public event Func<ValueTask>? Connected; 
-	public event Func<ValueTask>? Disconnected; 
-
-	/// <summary>Gets the remote endpoint of the underlying client.</summary>
+	/// <summary>Gets the unique identifier of the underlying session.</summary>
+	public string SessionId =>
+		_sessionId ??= Uuid.New();
+	
+	/// <summary>Gets the remote endpoint of the underlying session.</summary>
 	public IPEndPoint RemoteEndPoint =>
 		(IPEndPoint)_socket.RemoteEndPoint!;
 
 	/// <summary>Triggered when the session is closed.</summary>
 	public CancellationToken SessionClosed =>
 		_cts.Token;
-
-	/// <summary>Initializes a new instance of the <see cref="PokemonClient"/> class.</summary>
+	
+	/// <summary>Determines whether the session is connected.</summary>
+	public bool IsConnected =>
+		!_disposed && _socket.Connected && !_cts.IsCancellationRequested;
+	
+	/// <summary>Initializes a new instance of the <see cref="BaseSession"/> class.</summary>
+	/// <param name="socket">The bound socket.</param>
 	/// <param name="messageParser">The message parser.</param>
 	/// <param name="messageDispatcher">The message dispatcher.</param>
-	public PokemonClient(IMessageParser messageParser, IMessageDispatcher messageDispatcher)
+	protected BaseSession(
+		Socket socket, 
+		IMessageParser messageParser, 
+		IMessageDispatcher messageDispatcher)
 	{
-		_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		_socket = socket;
 		_messageParser = messageParser;
 		_messageDispatcher = messageDispatcher;
 		_cts = new CancellationTokenSource();
+		_pipe = DuplexPipe.Create(socket);
 	}
 
-	/// <summary>Connects the session to the specified endpoint.</summary>
-	public async Task ConnectAsync(IPEndPoint endPoint)
+	internal async Task ReceiveAsync()
 	{
-		try
-		{
-			await _socket.ConnectAsync(endPoint, _cts.Token).ConfigureAwait(false);
-
-            _pipe = DuplexPipe.Create(_socket);
-        }
-		catch (SocketException e)
-		{
-			throw new InvalidOperationException("Failed to connect to the remote endpoint", e);
-		}
-
-		_ = ReceiveAsync().ConfigureAwait(false);
-	}
-
-	private async Task ReceiveAsync()
-	{
-		if (Connected is not null)
-			await Connected().ConfigureAwait(false);
-		
 		try
 		{
 			while (!_cts.IsCancellationRequested)
 			{
 				var readResult = await _pipe.Input.ReadAsync(_cts.Token).ConfigureAwait(false);
-
+				
 				if (readResult.IsCanceled)
 					break;
-
+				
 				var buffer = readResult.Buffer;
 
 				try
 				{
-					while (_messageParser.TryDecodeMessage(buffer, out var message))
-						await _messageDispatcher.DispatchClientAsync(this, message).ConfigureAwait(false);
+					if (_messageParser.TryDecodeMessage(buffer, out var message))
+						await _messageDispatcher.DispatchServerAsync(this, message).ConfigureAwait(false);
 
 					if (readResult.IsCompleted)
 					{
 						if (!buffer.IsEmpty)
 							throw new InvalidOperationException("Incomplete message received");
-
+					
 						break;
 					}
 				}
@@ -96,11 +88,6 @@ public sealed class PokemonClient : INetworkPeer, IAsyncDisposable
 		{
 			/* ignore */
 		}
-		finally
-		{
-			if (Disconnected is not null)
-				await Disconnected().ConfigureAwait(false);
-		}
 	}
 
 	/// <summary>Asynchronously sends a message to the remote endpoint.</summary>
@@ -108,7 +95,7 @@ public sealed class PokemonClient : INetworkPeer, IAsyncDisposable
 	public ValueTask SendAsync(PokemonMessage message)
 	{
 		if (_disposed)
-			throw new ObjectDisposedException(nameof(PokemonClient));
+			throw new ObjectDisposedException(nameof(BaseSession));
 
 		if (_cts.IsCancellationRequested)
 			return ValueTask.CompletedTask;
@@ -168,5 +155,7 @@ public sealed class PokemonClient : INetworkPeer, IAsyncDisposable
 		_socket.Close();
 		_socket.Dispose();
 		_cts.Dispose();
+		
+		GC.SuppressFinalize(this);
 	}
 }
