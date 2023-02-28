@@ -14,14 +14,14 @@ namespace Pokemon.Core.Network.Transport;
 public abstract class BaseServer<TSession>
 	where TSession : BaseSession
 {
-	private readonly Socket _socket;
 	private readonly CancellationTokenSource _cts;
+	private readonly ILogger<BaseServer<TSession>> _logger;
 	private readonly IMessageDispatcher _messageDispatcher;
 	private readonly IMessageParser _messageParser;
-	private readonly ILogger<BaseServer<TSession>> _logger;
 	private readonly ServerOptions _options;
+	private readonly Socket _socket;
 
-	/// <summary>Initializes a new instance of the <see cref="BaseServer{TSession}"/> class.</summary>
+	/// <summary>Initializes a new instance of the <see cref="BaseServer{TSession}" /> class.</summary>
 	/// <param name="messageParser">The message parser.</param>
 	/// <param name="messageDispatcher">The message dispatcher.</param>
 	/// <param name="logger">The logger.</param>
@@ -40,7 +40,7 @@ public abstract class BaseServer<TSession>
 	public async Task StartAsync()
 	{
 		var endPoint = new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port);
-		
+
 		try
 		{
 			_socket.Bind(endPoint);
@@ -50,9 +50,9 @@ public abstract class BaseServer<TSession>
 			_logger.LogError(e, "Failed to bind to {EndPoint}", endPoint);
 			return;
 		}
-		
+
 		_socket.Listen();
-		
+
 		_logger.LogInformation("Server listening on {EndPoint}", endPoint);
 
 		while (!_cts.IsCancellationRequested)
@@ -71,13 +71,13 @@ public abstract class BaseServer<TSession>
 				.FireAndForget();
 		}
 	}
-	
-	/// <summary>Initializes a new instance of the <see cref="TSession"/> class.</summary>
+
+	/// <summary>Initializes a new instance of the <see cref="TSession" /> class.</summary>
 	/// <param name="socket">The bound socket.</param>
 	/// <param name="messageParser">The message parser.</param>
 	/// <param name="messageDispatcher">The message dispatcher.</param>
 	protected abstract TSession CreateSession(Socket socket, IMessageParser messageParser, IMessageDispatcher messageDispatcher);
-	
+
 	/// <summary>Called when a session is connected.</summary>
 	/// <param name="session">The connected session.</param>
 	protected virtual Task OnSessionConnectedAsync(TSession session)

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Pokemon.Client.Handlers.Authentication;
 using Pokemon.Client.Network;
 using Pokemon.Core.Extensions;
 using Pokemon.Core.Network.Dispatching;
@@ -21,7 +22,7 @@ public sealed class PokemonGame : AbstractGame
 	public PokemonGame() : base(1280, 720, "Pokémon")
 	{
 	}
-	
+
 	protected override void ConfigureServices(IServiceCollection services)
 	{
 		services
@@ -30,6 +31,8 @@ public sealed class PokemonGame : AbstractGame
 			.AddSingleton<IMessageFactory, MessageFactory>()
 			.AddSingleton<IMessageDispatcher, MessageDispatcher>()
 			.AddSingleton<PokemonClient>()
+			.AddSingleton<AuthenticationFailedHandler>()
+			.AddSingleton<AuthenticationSuccessHandler>()
 			.Configure<ClientOptions>(Configuration.GetRequiredSection("Network"));
 	}
 
@@ -39,7 +42,7 @@ public sealed class PokemonGame : AbstractGame
 		var messageDispatcher = Services.GetRequiredService<IMessageDispatcher>();
 		var client = Services.GetRequiredService<PokemonClient>();
 
-		messageFactory.Initialize(typeof(HelloConnectMessage).Assembly);
+		messageFactory.Initialize(typeof(IdentificationRequestMessage).Assembly);
 		messageDispatcher.InitializeClient(typeof(PokemonGame).Assembly);
 		client.ConnectAsync().FireAndForget();
 	}
@@ -48,7 +51,7 @@ public sealed class PokemonGame : AbstractGame
 	{
 		_spriteBatch = new SpriteBatch(GraphicsDevice);
 	}
-	
+
 	protected override void UnloadContent()
 	{
 		_spriteBatch.Dispose();

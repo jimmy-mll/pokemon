@@ -15,6 +15,6 @@ public abstract class SessionHandler<TContext, TMessage> : SessionHandler
 {
 	internal override Func<BaseSession, PokemonMessage, Task> Delegate =>
 		(client, message) => HandleAsync((TContext)client, (TMessage)message);
-	
-	protected abstract Task HandleAsync(TContext context, TMessage message);
+
+	protected abstract Task HandleAsync(TContext session, TMessage message);
 }

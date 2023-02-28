@@ -10,11 +10,11 @@ namespace Pokemon.Core.Network.Factory;
 public class MessageFactory : IMessageFactory
 {
 	private static readonly Type MessageType = typeof(PokemonMessage);
-	
-	private readonly ConcurrentDictionary<ushort, Func<PokemonMessage>> _messages;
 	private readonly ConcurrentDictionary<ushort, string> _messageNames;
-	
-	/// <summary>Initializes a new instance of the <see cref="MessageFactory"/> class.</summary>
+
+	private readonly ConcurrentDictionary<ushort, Func<PokemonMessage>> _messages;
+
+	/// <summary>Initializes a new instance of the <see cref="MessageFactory" /> class.</summary>
 	public MessageFactory()
 	{
 		_messages = new ConcurrentDictionary<ushort, Func<PokemonMessage>>();
@@ -30,9 +30,9 @@ public class MessageFactory : IMessageFactory
 
 			if (_messages.ContainsKey(messageId))
 				throw new Exception("A message with the same id already exists.");
-			
+
 			var factory = Expression.Lambda<Func<PokemonMessage>>(Expression.New(type)).Compile();
-			
+
 			_messages.TryAdd(messageId, factory);
 			_messageNames.TryAdd(messageId, type.Name);
 		}
@@ -42,10 +42,10 @@ public class MessageFactory : IMessageFactory
 	public bool TryGetMessage(ushort messageId, [NotNullWhen(true)] out PokemonMessage? message)
 	{
 		message = null;
-		
+
 		if (!_messages.TryGetValue(messageId, out var factory))
 			return false;
-		
+
 		message = factory();
 		return true;
 	}

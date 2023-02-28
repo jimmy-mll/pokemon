@@ -14,14 +14,14 @@ public class MessageDispatcher : IMessageDispatcher
 {
 	private static readonly Type SessionHandlerType = typeof(SessionHandler<,>);
 	private static readonly Type ClientHandlerType = typeof(ClientHandler<,>);
-	
-	private readonly ConcurrentDictionary<ushort, Type> _sessionHandlers;
 	private readonly ConcurrentDictionary<ushort, Type> _clientHandlers;
-	private readonly IServiceProvider _provider;
 	private readonly ILogger<MessageDispatcher> _logger;
 	private readonly IMessageFactory _messageFactory;
+	private readonly IServiceProvider _provider;
 
-	/// <summary>Initializes a new instance of the <see cref="MessageDispatcher"/> class.</summary>
+	private readonly ConcurrentDictionary<ushort, Type> _sessionHandlers;
+
+	/// <summary>Initializes a new instance of the <see cref="MessageDispatcher" /> class.</summary>
 	/// <param name="provider">The service provider.</param>
 	/// <param name="logger">The logger.</param>
 	/// <param name="messageFactory">The message factory.</param>
@@ -33,7 +33,7 @@ public class MessageDispatcher : IMessageDispatcher
 		_sessionHandlers = new ConcurrentDictionary<ushort, Type>();
 		_clientHandlers = new ConcurrentDictionary<ushort, Type>();
 	}
-	
+
 	/// <inheritdoc />
 	public void InitializeClient(Assembly assembly)
 	{
@@ -46,7 +46,7 @@ public class MessageDispatcher : IMessageDispatcher
 			var parameters = type.BaseType!.GetGenericArguments();
 
 			var messageType = parameters[1];
-			
+
 			var messageId = Convert.ToUInt16(messageType.GetField("Identifier")?.GetValue(null));
 
 			if (_clientHandlers.TryAdd(messageId, type))
@@ -66,7 +66,7 @@ public class MessageDispatcher : IMessageDispatcher
 			var parameters = type.BaseType!.GetGenericArguments();
 
 			var messageType = parameters[1];
-			
+
 			var messageId = Convert.ToUInt16(messageType.GetField("Identifier")?.GetValue(null));
 
 			if (_sessionHandlers.TryAdd(messageId, type))
@@ -82,7 +82,7 @@ public class MessageDispatcher : IMessageDispatcher
 			_logger.LogWarning("Unknown message with id {MessageName}", message.MessageId);
 			return;
 		}
-		
+
 		if (!_sessionHandlers.TryGetValue(message.MessageId, out var type))
 		{
 			_logger.LogWarning("No handler found for message {MessageName}", message.MessageId);
@@ -94,7 +94,7 @@ public class MessageDispatcher : IMessageDispatcher
 		try
 		{
 			await handler.Delegate(session, message).ConfigureAwait(false);
-			
+
 			_logger.LogInformation("Dispatched message {MessageName} to {HandlerName}", messageName, type.Name);
 		}
 		catch (TargetInvocationException e)
@@ -111,7 +111,7 @@ public class MessageDispatcher : IMessageDispatcher
 			_logger.LogWarning("Unknown message with id {MessageName}", message.MessageId);
 			return;
 		}
-		
+
 		if (!_sessionHandlers.TryGetValue(message.MessageId, out var type))
 		{
 			_logger.LogWarning("No handler found for message {MessageName}", message.MessageId);
@@ -123,7 +123,7 @@ public class MessageDispatcher : IMessageDispatcher
 		try
 		{
 			await handler.Delegate(client, message).ConfigureAwait(false);
-			
+
 			_logger.LogInformation("Dispatched message {MessageName} to {HandlerName}", messageName, type.Name);
 		}
 		catch (TargetInvocationException e)

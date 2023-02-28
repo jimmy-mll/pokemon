@@ -14,25 +14,30 @@ namespace Pokemon.Core.Network.Transport;
 
 public abstract class BaseClient : IAsyncDisposable
 {
-	private IDuplexPipe _pipe = null!;
-	private readonly Socket _socket;
 	private readonly CancellationTokenSource _cts;
-	private readonly IMessageParser _messageParser;
-	private readonly IMessageDispatcher _messageDispatcher;
 	private readonly ILogger<BaseClient> _logger;
+	private readonly IMessageDispatcher _messageDispatcher;
+	private readonly IMessageParser _messageParser;
 	private readonly ClientOptions _options;
+	private readonly Socket _socket;
 
+	private string? _clientId;
 	private bool _disposed;
+	private IDuplexPipe _pipe = null!;
 
 	/// <summary>Gets the remote endpoint of the underlying client.</summary>
 	public IPEndPoint RemoteEndPoint =>
 		(IPEndPoint)_socket.RemoteEndPoint!;
 
+	/// <summary>Gets the unique identifier of the underlying client.</summary>
+	public string ClientId =>
+		_clientId ??= Uuid.New();
+
 	/// <summary>Triggered when the session is closed.</summary>
 	public CancellationToken SessionClosed =>
 		_cts.Token;
 
-	/// <summary>Initializes a new instance of the <see cref="BaseClient"/> class.</summary>
+	/// <summary>Initializes a new instance of the <see cref="BaseClient" /> class.</summary>
 	/// <param name="messageParser">The message parser.</param>
 	/// <param name="messageDispatcher">The message dispatcher.</param>
 	/// <param name="logger">The logger.</param>
@@ -47,19 +52,48 @@ public abstract class BaseClient : IAsyncDisposable
 		_cts = new CancellationTokenSource();
 	}
 
+	/// <inheritdoc />
+	public async ValueTask DisposeAsync()
+	{
+		if (_disposed)
+			return;
+
+		_disposed = true;
+
+		Disconnect();
+
+		await _pipe.Input.CompleteAsync().ConfigureAwait(false);
+		await _pipe.Output.CompleteAsync().ConfigureAwait(false);
+
+		try
+		{
+			_socket.Shutdown(SocketShutdown.Both);
+		}
+		catch (SocketException)
+		{
+			/* ignore */
+		}
+
+		_socket.Close();
+		_socket.Dispose();
+		_cts.Dispose();
+
+		GC.SuppressFinalize(this);
+	}
+
 	/// <summary>Connects the session to the specified endpoint.</summary>
 	public async Task ConnectAsync()
 	{
 		var endPoint = new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port);
-		
+
 		try
 		{
 			await _socket.ConnectAsync(endPoint, _cts.Token).ConfigureAwait(false);
-			
+
 			_logger.LogInformation("Client {Name} connected to {EndPoint}", this, endPoint);
 
-            _pipe = DuplexPipe.Create(_socket);
-        }
+			_pipe = DuplexPipe.Create(_socket);
+		}
 		catch (SocketException e)
 		{
 			throw new InvalidOperationException("Failed to connect to the remote endpoint", e);
@@ -71,7 +105,7 @@ public abstract class BaseClient : IAsyncDisposable
 	private async Task ReceiveAsync()
 	{
 		await OnConnectedAsync().ConfigureAwait(false);
-		
+
 		try
 		{
 			while (!_cts.IsCancellationRequested)
@@ -131,7 +165,7 @@ public abstract class BaseClient : IAsyncDisposable
 		return !flushTask.IsCompletedSuccessfully
 			? FireAndForget(flushTask)
 			: ValueTask.CompletedTask;
-		
+
 		static async ValueTask FireAndForget(ValueTask<FlushResult> flushTask) =>
 			await flushTask.ConfigureAwait(false);
 	}
@@ -142,45 +176,16 @@ public abstract class BaseClient : IAsyncDisposable
 	{
 		if (_cts.IsCancellationRequested)
 			return;
-		
+
 		if (delay.HasValue)
 			_cts.CancelAfter(delay.Value);
 		else
 			_cts.Cancel();
-		
+
 		_pipe.Input.CancelPendingRead();
 		_pipe.Output.CancelPendingFlush();
 	}
 
-	/// <inheritdoc />
-	public async ValueTask DisposeAsync()
-	{
-		if (_disposed)
-			return;
-		
-		_disposed = true;
-		
-		Disconnect();
-
-		await _pipe.Input.CompleteAsync().ConfigureAwait(false);
-		await _pipe.Output.CompleteAsync().ConfigureAwait(false);
-		
-		try
-		{
-			_socket.Shutdown(SocketShutdown.Both);
-		}
-		catch (SocketException)
-		{
-			/* ignore */
-		}
-		
-		_socket.Close();
-		_socket.Dispose();
-		_cts.Dispose();
-		
-		GC.SuppressFinalize(this);
-	}
-	
 	/// <summary>Called when the session is connected to the remote endpoint.</summary>
 	protected virtual ValueTask OnConnectedAsync()
 	{

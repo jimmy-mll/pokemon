@@ -11,11 +11,11 @@ namespace Pokemon.Core.Network.Transport;
 /// <summary>A network session that represents a connection to a remote endpoint.</summary>
 public abstract class BaseSession : IAsyncDisposable
 {
-	private readonly Socket _socket;
 	private readonly CancellationTokenSource _cts;
-	private readonly IDuplexPipe _pipe;
-	private readonly IMessageParser _messageParser;
 	private readonly IMessageDispatcher _messageDispatcher;
+	private readonly IMessageParser _messageParser;
+	private readonly IDuplexPipe _pipe;
+	private readonly Socket _socket;
 
 	private bool _disposed;
 	private string? _sessionId;
@@ -23,7 +23,7 @@ public abstract class BaseSession : IAsyncDisposable
 	/// <summary>Gets the unique identifier of the underlying session.</summary>
 	public string SessionId =>
 		_sessionId ??= Uuid.New();
-	
+
 	/// <summary>Gets the remote endpoint of the underlying session.</summary>
 	public IPEndPoint RemoteEndPoint =>
 		(IPEndPoint)_socket.RemoteEndPoint!;
@@ -31,18 +31,18 @@ public abstract class BaseSession : IAsyncDisposable
 	/// <summary>Triggered when the session is closed.</summary>
 	public CancellationToken SessionClosed =>
 		_cts.Token;
-	
+
 	/// <summary>Determines whether the session is connected.</summary>
 	public bool IsConnected =>
 		!_disposed && _socket.Connected && !_cts.IsCancellationRequested;
-	
-	/// <summary>Initializes a new instance of the <see cref="BaseSession"/> class.</summary>
+
+	/// <summary>Initializes a new instance of the <see cref="BaseSession" /> class.</summary>
 	/// <param name="socket">The bound socket.</param>
 	/// <param name="messageParser">The message parser.</param>
 	/// <param name="messageDispatcher">The message dispatcher.</param>
 	protected BaseSession(
-		Socket socket, 
-		IMessageParser messageParser, 
+		Socket socket,
+		IMessageParser messageParser,
 		IMessageDispatcher messageDispatcher)
 	{
 		_socket = socket;
@@ -52,6 +52,35 @@ public abstract class BaseSession : IAsyncDisposable
 		_pipe = DuplexPipe.Create(socket);
 	}
 
+	/// <inheritdoc />
+	public async ValueTask DisposeAsync()
+	{
+		if (_disposed)
+			return;
+
+		_disposed = true;
+
+		Disconnect();
+
+		await _pipe.Input.CompleteAsync().ConfigureAwait(false);
+		await _pipe.Output.CompleteAsync().ConfigureAwait(false);
+
+		try
+		{
+			_socket.Shutdown(SocketShutdown.Both);
+		}
+		catch (SocketException)
+		{
+			/* ignore */
+		}
+
+		_socket.Close();
+		_socket.Dispose();
+		_cts.Dispose();
+
+		GC.SuppressFinalize(this);
+	}
+
 	internal async Task ReceiveAsync()
 	{
 		try
@@ -59,10 +88,10 @@ public abstract class BaseSession : IAsyncDisposable
 			while (!_cts.IsCancellationRequested)
 			{
 				var readResult = await _pipe.Input.ReadAsync(_cts.Token).ConfigureAwait(false);
-				
+
 				if (readResult.IsCanceled)
 					break;
-				
+
 				var buffer = readResult.Buffer;
 
 				try
@@ -74,7 +103,7 @@ public abstract class BaseSession : IAsyncDisposable
 					{
 						if (!buffer.IsEmpty)
 							throw new InvalidOperationException("Incomplete message received");
-					
+
 						break;
 					}
 				}
@@ -109,7 +138,7 @@ public abstract class BaseSession : IAsyncDisposable
 		return !flushTask.IsCompletedSuccessfully
 			? FireAndForget(flushTask)
 			: ValueTask.CompletedTask;
-		
+
 		static async ValueTask FireAndForget(ValueTask<FlushResult> flushTask) =>
 			await flushTask.ConfigureAwait(false);
 	}
@@ -120,42 +149,13 @@ public abstract class BaseSession : IAsyncDisposable
 	{
 		if (_cts.IsCancellationRequested)
 			return;
-		
+
 		if (delay.HasValue)
 			_cts.CancelAfter(delay.Value);
 		else
 			_cts.Cancel();
-		
+
 		_pipe.Input.CancelPendingRead();
 		_pipe.Output.CancelPendingFlush();
-	}
-
-	/// <inheritdoc />
-	public async ValueTask DisposeAsync()
-	{
-		if (_disposed)
-			return;
-		
-		_disposed = true;
-		
-		Disconnect();
-
-		await _pipe.Input.CompleteAsync().ConfigureAwait(false);
-		await _pipe.Output.CompleteAsync().ConfigureAwait(false);
-		
-		try
-		{
-			_socket.Shutdown(SocketShutdown.Both);
-		}
-		catch (SocketException)
-		{
-			/* ignore */
-		}
-		
-		_socket.Close();
-		_socket.Dispose();
-		_cts.Dispose();
-		
-		GC.SuppressFinalize(this);
 	}
 }

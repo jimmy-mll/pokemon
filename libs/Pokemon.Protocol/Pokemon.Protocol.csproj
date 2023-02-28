@@ -3,17 +3,15 @@
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Datacenter" />
-      <Folder Include="Enums" />
-      <Folder Include="Types" />
+        <Folder Include="Datacenter"/>
+        <Folder Include="Types"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Pokemon.Core\Pokemon.Core.csproj" />
+        <ProjectReference Include="..\Pokemon.Core\Pokemon.Core.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -15,7 +15,7 @@ public static class TaskExtensions
 			Debug.WriteLine(e, "TaskExtensions");
 		}
 	}
-	
+
 	public static async void FireAndForget<T>(this Task<T> task)
 	{
 		try
@@ -27,7 +27,7 @@ public static class TaskExtensions
 			Debug.WriteLine(e, "TaskExtensions");
 		}
 	}
-	
+
 	public static async void FireAndForget(this ValueTask task)
 	{
 		try
@@ -39,7 +39,7 @@ public static class TaskExtensions
 			Debug.WriteLine(e, "TaskExtensions");
 		}
 	}
-	
+
 	public static async void FireAndForget<T>(this ValueTask<T> task)
 	{
 		try

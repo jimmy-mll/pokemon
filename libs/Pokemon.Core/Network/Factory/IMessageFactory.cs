@@ -9,7 +9,7 @@ public interface IMessageFactory
 	/// <summary>Registers all messages from the given <paramref name="assembly" />.</summary>
 	/// <param name="assembly">The assembly to find messages in.</param>
 	void Initialize(Assembly assembly);
-	
+
 	/// <summary>Attempts to get a <paramref name="message" /> based on its <paramref name="messageId" />.</summary>
 	/// <param name="messageId">The id of the message.</param>
 	/// <param name="message">The found message.</param>
