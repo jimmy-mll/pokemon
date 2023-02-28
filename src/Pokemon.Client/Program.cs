@@ -1,2 +1,2 @@
-﻿using var game = new Pokemon.Client.Game1();
+﻿using var game = new Pokemon.Client.PokemonGame();
 game.Run();
