@@ -74,12 +74,13 @@ public static class ReflectionExtensions
 	/// <param name="method">The method.</param>
 	/// <typeparam name="TFirst">The type of the first parameter.</typeparam>
 	/// <typeparam name="TSecond">The type of the second parameter.</typeparam>
+	/// <typeparam name="TResult">The type of the result.</typeparam>
 	/// <returns>A delegate that represents the method.</returns>
 	/// <exception cref="InvalidCastException">Whether a parameter is not castable.</exception>
-	public static Action<TFirst, TSecond> CreateDelegate<TFirst, TSecond>(this MethodInfo method)
+	public static Func<TFirst, TSecond, TResult> CreateDelegateV2<TFirst, TSecond, TResult>(this MethodInfo method)
 	{
-		var returnType = typeof(void);
-		
+		var returnType = typeof(TResult);
+
 		var methodParameters = method.GetParameters().Select(p => p.ParameterType).ToArray();
 
 		var delegateParameters = new[] { typeof(TFirst), typeof(TSecond) };
@@ -128,6 +129,6 @@ public static class ReflectionExtensions
 
 		generator.Emit(OpCodes.Ret);
 
-		return dynamicMethod.CreateDelegate<Action<TFirst, TSecond>>();
+		return dynamicMethod.CreateDelegate<Func<TFirst, TSecond, TResult>>();
 	}
 }
