@@ -13,9 +13,24 @@ public abstract class AbstractGame : Game
 {
 	private const string LoggingTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
 	
-	protected GraphicsDeviceManager Graphics { get; }
+	public GraphicsDeviceManager Graphics { get; }
+
+	public GameScene Scene
+	{
+		get => _currentScene;
+		set
+		{
+			if (_currentScene == value) return;
+
+			_currentScene?.Unload();
+
+			_currentScene = value;
+			_shouldLoadSceneNextFrame = true;
+
+        }
+	}
 	
-	protected new IServiceProvider Services { get; private set; }
+	public new IServiceProvider Services { get; private set; }
 	
 	protected IConfiguration Configuration { get; private set; }
 

@@ -24,7 +24,6 @@ public class MainScene : GameScene
 
     protected override void OnLoad()
     {
-
         var padding = 50;
         var scale = new Scale(0.05f, 0.05f);
 
