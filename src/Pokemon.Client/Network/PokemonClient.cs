@@ -25,6 +25,7 @@ public sealed class PokemonClient : BaseClient
 
 	protected override async ValueTask OnConnectedAsync()
 	{
+		Username = "Aerafal";
 		var encryptedPassword = Convert.ToBase64String(MD5.HashData(Encoding.UTF8.GetBytes(Password)));
 
 		await base.OnConnectedAsync();

@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.WebSockets;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Pokemon.Client.Handlers.Authentication;
 using Pokemon.Client.Network;
 using Pokemon.Client.Services.Game.Scenes;
@@ -32,20 +29,14 @@ public sealed class PokemonGame : AbstractGame
 			.AddSingleton<IMessageFactory, MessageFactory>()
 			.AddSingleton<IMessageDispatcher, MessageDispatcher>()
 			.AddSingleton<PokemonClient>()
-            .AddSingleton<AuthenticationFailedHandler>()
-            .AddSingleton<AuthenticationSuccessHandler>()
-            .AddSingleton<ITextureManagerServices, TextureManagerServices>()
-			.AddScoped<ISceneManagerServices, SceneManagerServices>()
+			.AddSingleton<AuthenticationFailedHandler>()
+			.AddSingleton<AuthenticationSuccessHandler>()
+			.AddSingleton<ITextureManagerServices, TextureManagerServices>()
+			.AddSingleton<ISceneManagerServices, SceneManagerServices>()
+			.AddSingleton<MainScene>()
 			.Configure<ClientOptions>(Configuration.GetRequiredSection("Network"));
-
-		this.ConfigureScenes(services);
 	}
-
-	private void ConfigureScenes(IServiceCollection services)
-	{
-		services.AddSingleton<MainScene>();
-	}
-
+	
 	protected override void InitializeServices()
 	{
 		var messageFactory = Services.GetRequiredService<IMessageFactory>();
@@ -54,16 +45,16 @@ public sealed class PokemonGame : AbstractGame
 
 		messageFactory.Initialize(typeof(IdentificationRequestMessage).Assembly);
 		messageDispatcher.InitializeClient(typeof(PokemonGame).Assembly);
-		//client.ConnectAsync().FireAndForget();
+		client.ConnectAsync().FireAndForget();
 	}
 
-    protected override void LoadContent()
-    {
+	protected override void LoadContent()
+	{
 		Scene = Services.GetRequiredService<MainScene>();
 
 		var textureManager = Services.GetRequiredService<ITextureManagerServices>();
 		textureManager.AddTexture(GameSprites.Pikachu, Content.Load<Texture2D>("pikachu"));
 
-        base.LoadContent();
-    }
+		base.LoadContent();
+	}
 }

@@ -7,8 +7,6 @@ namespace Pokemon.Client.Handlers.Authentication;
 
 public sealed class AuthenticationSuccessHandler : ClientHandler<PokemonClient, IdentificationSuccessMessage>
 {
-	protected override Task HandleAsync(PokemonClient client, IdentificationSuccessMessage message)
-	{
-		return Task.CompletedTask;
-	}
+	protected override Task HandleAsync(PokemonClient client, IdentificationSuccessMessage message) =>
+		Task.CompletedTask;
 }

@@ -12,7 +12,10 @@ namespace Pokemon.Monogame;
 public abstract class AbstractGame : Game
 {
 	private const string LoggingTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
-	
+	private GameScene _currentScene;
+
+	private bool _shouldLoadSceneNextFrame;
+
 	public GraphicsDeviceManager Graphics { get; }
 
 	public GameScene Scene
@@ -26,16 +29,12 @@ public abstract class AbstractGame : Game
 
 			_currentScene = value;
 			_shouldLoadSceneNextFrame = true;
-
-        }
+		}
 	}
-	
-	public new IServiceProvider Services { get; private set; }
-	
-	protected IConfiguration Configuration { get; private set; }
 
-	private bool _shouldLoadSceneNextFrame;
-	private GameScene? _currentScene;
+	public new IServiceProvider Services { get; private set; }
+
+	protected IConfiguration Configuration { get; private set; }
 
 	protected AbstractGame(int width, int height, string title)
 	{
@@ -77,15 +76,15 @@ public abstract class AbstractGame : Game
 
 		TextureUtils.Initialize(GraphicsDevice);
 
-        base.Initialize();
+		base.Initialize();
 	}
 
 	protected abstract void InitializeServices();
 
 	protected abstract void ConfigureServices(IServiceCollection services);
 
-    protected override void Update(GameTime gameTime)
-    {
+	protected override void Update(GameTime gameTime)
+	{
 		if (_shouldLoadSceneNextFrame)
 		{
 			Scene?.Load();
@@ -94,7 +93,7 @@ public abstract class AbstractGame : Game
 
 		Scene?.Update(gameTime);
 
-        base.Update(gameTime);
+		base.Update(gameTime);
 	}
 
 	protected override void Draw(GameTime gameTime)

@@ -16,7 +16,11 @@ public sealed class AuthenticationHandler : SessionHandler<PokemonSession, Ident
 		const string expectedPassword = "password";
 
 		// Exemple
-		if (!string.Equals(expectedPassword, decryptedPassword)) await session.SendAsync(new IdentificationFailedMessage(IdentificationFailureReasons.InvalidCredentials));
+		if (!string.Equals(expectedPassword, decryptedPassword))
+		{
+			await session.SendAsync(new IdentificationFailedMessage(IdentificationFailureReasons.InvalidCredentials));
+			return;
+		}
 
 		await session.SendAsync(new IdentificationSuccessMessage());
 	}

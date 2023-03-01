@@ -49,7 +49,7 @@ public class MessageDispatcher : IMessageDispatcher
 
 			var messageId = Convert.ToUInt16(messageType.GetField("Identifier")?.GetValue(null));
 
-			if (_clientHandlers.TryAdd(messageId, type))
+			if (!_clientHandlers.TryAdd(messageId, type))
 				_logger.LogWarning("Duplicate message handler for message {MessageName} in {TypeName}", messageType.Name, type.Name);
 		}
 	}
@@ -69,7 +69,7 @@ public class MessageDispatcher : IMessageDispatcher
 
 			var messageId = Convert.ToUInt16(messageType.GetField("Identifier")?.GetValue(null));
 
-			if (_sessionHandlers.TryAdd(messageId, type))
+			if (!_sessionHandlers.TryAdd(messageId, type))
 				_logger.LogWarning("Duplicate message handler for message {MessageName} in {TypeName}", messageType.Name, type.Name);
 		}
 	}
@@ -77,7 +77,7 @@ public class MessageDispatcher : IMessageDispatcher
 	/// <inheritdoc />
 	public async Task DispatchServerAsync(BaseSession session, PokemonMessage message)
 	{
-		if (_messageFactory.TryGetMessageName(message.MessageId, out var messageName))
+		if (!_messageFactory.TryGetMessageName(message.MessageId, out var messageName))
 		{
 			_logger.LogWarning("Unknown message with id {MessageName}", message.MessageId);
 			return;
@@ -106,13 +106,13 @@ public class MessageDispatcher : IMessageDispatcher
 	/// <inheritdoc />
 	public async Task DispatchClientAsync(BaseClient client, PokemonMessage message)
 	{
-		if (_messageFactory.TryGetMessageName(message.MessageId, out var messageName))
+		if (!_messageFactory.TryGetMessageName(message.MessageId, out var messageName))
 		{
 			_logger.LogWarning("Unknown message with id {MessageName}", message.MessageId);
 			return;
 		}
 
-		if (!_sessionHandlers.TryGetValue(message.MessageId, out var type))
+		if (!_clientHandlers.TryGetValue(message.MessageId, out var type))
 		{
 			_logger.LogWarning("No handler found for message {MessageName}", message.MessageId);
 			return;
