@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Microsoft.Xna.Framework.Input;
 
@@ -38,6 +39,13 @@ public sealed class KeyboardService : IKeyboardService
 
 	public Keys GetKeyForMapping(KeyboardMappings mapping) =>
 		_mappings[mapping];
+
+	public KeyboardMappings GetMappingForKey(Keys key)
+	{
+		return _mappings.ContainsValue(key) 
+			? _mappings.First(x => x.Value == key).Key
+			: KeyboardMappings.None;
+	}
 
 	public void SetKeyForMapping(KeyboardMappings mapping, Keys key) =>
 		_mappings[mapping] = key;

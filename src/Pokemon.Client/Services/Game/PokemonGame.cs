@@ -10,6 +10,7 @@ using Pokemon.Core.Network.Factory;
 using Pokemon.Core.Network.Framing;
 using Pokemon.Core.Network.Options;
 using Pokemon.Monogame;
+using Pokemon.Monogame.Services.Keyboard;
 using Pokemon.Monogame.Services.Scenes;
 using Pokemon.Monogame.Services.Textures;
 using Pokemon.Protocol.Messages.Authentication;
@@ -33,6 +34,7 @@ public sealed class PokemonGame : AbstractGame
 			.AddSingleton<AuthenticationSuccessHandler>()
 			.AddSingleton<ITextureService, TextureService>()
 			.AddSingleton<ISceneService, SceneService>()
+			.AddSingleton<IKeyboardService, KeyboardService>()
 			.AddSingleton<MainScene>()
 			.Configure<ClientOptions>(Configuration.GetRequiredSection("Network"));
 	}
@@ -54,6 +56,8 @@ public sealed class PokemonGame : AbstractGame
 
 		var textureManager = Services.GetRequiredService<ITextureService>();
 		textureManager.AddTexture(GameSprites.Pikachu, Content.Load<Texture2D>("pikachu"));
+		textureManager.AddTexture(GameSprites.PlayerWalk, Content.Load<Texture2D>("walk"));
+		textureManager.AddTexture(GameSprites.PlayerRun, Content.Load<Texture2D>("run"));
 
 		base.LoadContent();
 	}

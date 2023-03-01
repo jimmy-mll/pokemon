@@ -1,46 +1,34 @@
 ﻿using System;
 using Arch.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Pokemon.Monogame;
 using Pokemon.Monogame.ECS;
-using Pokemon.Monogame.ECS.Components;
 using Pokemon.Monogame.ECS.Components.Entities;
 using Pokemon.Monogame.ECS.Components.Renderers;
-using Pokemon.Monogame.Services.Textures;
-using Pokemon.Monogame.Utils;
+using Pokemon.Monogame.Services.Keyboard;
 
 namespace Pokemon.Client.Services.Game.Scenes;
 
 public class MainScene : GameScene
 {
-	private static readonly Color[] Colors = { Color.White, Color.Red, Color.Blue, Color.Yellow, Color.Magenta, Color.Cyan, Color.Aqua, Color.Pink };
-	private readonly ITextureService _textureManager;
-	private Vector2 _pikachuRealSize;
-
-	public MainScene(AbstractGame game, ITextureService textureManager) : base(game) =>
-		_textureManager = textureManager;
+	private const float MoveSpeed = 50f;
+	
+	private readonly IKeyboardService _keyboardService;
+	
+	public MainScene(AbstractGame game, IKeyboardService keyboardService) : base(game)
+	{
+		_keyboardService = keyboardService;
+	}
 
 	protected override void OnLoad()
 	{
-		var padding = 50;
-		var scale = new Scale(0.05f, 0.05f);
+		Services.GetRequiredService<IKeyboardService>().LoadMappings();
+		
+		var renderer = new SpriteSheetRenderer(GameSprites.PlayerWalk, Color.White, new SpriteSheet(new Vector2(128), new Vector2(32)));
 
-		_pikachuRealSize = TextureUtils.GetTextureSize(_textureManager.GetTexture(GameSprites.Pikachu)) * scale;
-
-		for (var i = 0; i < 1500; i++)
-		{
-			var renderer = new SpriteRenderer(GameSprites.Pikachu, Colors[Random.Shared.Next(Colors.Length)]);
-
-			var posX = Random.Shared.Next(padding, Graphics.PreferredBackBufferWidth - padding);
-			var posY = Random.Shared.Next(padding, Graphics.PreferredBackBufferHeight - padding);
-			var position = new Position(posX, posY);
-
-			var force = Random.Shared.NextSingle() * 50f + 25f;
-			var angle = Random.Shared.NextSingle() * MathF.PI * 2.0f;
-			var velocity = new Velocity(MathF.Cos(angle) * force, MathF.Sin(angle) * force);
-
-			World.Create<IRenderer, Scale, Position, Velocity>(renderer, scale, position, velocity);
-		}
+		World.Create<IRenderer, Position, Scale>(renderer, new Position(50, 50), new Scale(1f, 1f));
 
 		base.OnLoad();
 	}
@@ -49,22 +37,37 @@ public class MainScene : GameScene
 	{
 		var dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-		var query = new QueryDescription().WithAll<IRenderer, Position, Velocity, Scale>();
-		World.Query(query, (ref IRenderer renderer, ref Position position, ref Velocity velocity, ref Scale scale) =>
+		var query = new QueryDescription()
+			.WithAll<IRenderer, Position, Scale>();
+		
+		World.Query(query, (ref IRenderer renderer, ref Position position, ref Scale scale) =>
 		{
-			position.X += velocity.X * dt;
-			position.Y += velocity.Y * dt;
-
-			if (position.X - _pikachuRealSize.X * 0.5f < 0.0f || position.X + _pikachuRealSize.X * 0.5f > Graphics.PreferredBackBufferWidth)
+			foreach (var pressedKey in Keyboard.GetState().GetPressedKeys())
 			{
-				velocity.X = -velocity.X;
-				renderer.Color = Colors[Random.Shared.Next(Colors.Length)];
-			}
+				var mapping = _keyboardService.GetMappingForKey(pressedKey);
 
-			if (position.Y - _pikachuRealSize.Y * 0.5f < 0.0f || position.Y + _pikachuRealSize.Y * 0.5f > Graphics.PreferredBackBufferHeight)
-			{
-				velocity.Y = -velocity.Y;
-				renderer.Color = Colors[Random.Shared.Next(Colors.Length)];
+				switch (mapping)
+				{
+					case KeyboardMappings.Up:
+						position.Y -= MoveSpeed * dt;
+						break;
+					
+					case KeyboardMappings.Down:
+						position.Y += MoveSpeed * dt;
+						break;
+					
+					case KeyboardMappings.Left:
+						position.X -= MoveSpeed * dt;
+						break;
+					
+					case KeyboardMappings.Right:
+						position.X += MoveSpeed * dt;
+						break;
+					
+					case KeyboardMappings.None:
+					default:
+						continue;
+				}
 			}
 		});
 

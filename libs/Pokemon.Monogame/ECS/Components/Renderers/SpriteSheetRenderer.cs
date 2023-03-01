@@ -6,23 +6,25 @@ using Pokemon.Monogame.Services.Textures;
 
 namespace Pokemon.Monogame.ECS.Components.Renderers;
 
-public struct SpriteRenderer : IRenderer
+public struct SpriteSheetRenderer : IRenderer
 {
 	public Color Color { get; set; }
+	
 	public TextureRef TextureRef { get; set; }
+	
+	public SpriteSheet SpriteSheet { get; set; }
 
-	private static readonly Vector2 OriginScale = new(0.5f);
-
-	public SpriteRenderer() : this(TextureRef.None, Color.White)
+	public SpriteSheetRenderer() : this(TextureRef.None, Color.White, default)
 	{
 	}
 
-	public SpriteRenderer(TextureRef textureRef, Color color)
+	public SpriteSheetRenderer(TextureRef textureRef, Color color, SpriteSheet sheet)
 	{
 		TextureRef = textureRef;
 		Color = color;
+		SpriteSheet = sheet;
 	}
-
+	
 	public void Render(GameScene scene, SpriteBatch spriteBatch, Position position, Scale scale)
 	{
 		if (TextureRef == TextureRef.None)
@@ -31,8 +33,9 @@ public struct SpriteRenderer : IRenderer
 		var texturesManager = scene.Services.GetRequiredService<ITextureService>();
 
 		var texture = texturesManager.GetTexture(TextureRef);
-		var textureSize = new Vector2(texture.Width, texture.Height); //TODO: Create extension method to get the texture size
 
-		spriteBatch.Draw(texture, position, null, Color, 0f, OriginScale * textureSize, scale, 0, 0f);
+		var bounds = SpriteSheet.TilePositions[SpriteSheet.TileIndexX,SpriteSheet.TileIndexY];
+		
+		spriteBatch.Draw(texture, position, bounds, Color, 0f, Vector2.Zero, 1f, 0, 0f);
 	}
 }

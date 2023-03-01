@@ -2,6 +2,7 @@
 
 public enum KeyboardMappings
 {
+	None,
 	Left,
 	Right,
 	Up,

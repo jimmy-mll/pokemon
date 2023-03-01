@@ -10,5 +10,7 @@ public interface IKeyboardService
 	
 	Keys GetKeyForMapping(KeyboardMappings mapping);
 	
+	KeyboardMappings GetMappingForKey(Keys key);
+	
 	void SetKeyForMapping(KeyboardMappings mapping, Keys key);
 }

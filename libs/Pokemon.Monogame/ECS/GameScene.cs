@@ -76,8 +76,13 @@ public abstract class GameScene
 
 		SpriteBatch.Begin();
 
-		var queryDesc = new QueryDescription().WithAny<IRenderer, Position, Scale>();
-		World.Query(in queryDesc, (ref IRenderer renderer, ref Position position, ref Scale scale) => { renderer.Render(this, SpriteBatch, position, scale); });
+		var queryDesc = new QueryDescription()
+			.WithAll<IRenderer, Position, Scale>();
+		
+		World.Query(in queryDesc, (ref IRenderer renderer, ref Position position, ref Scale scale) =>
+		{
+			renderer.Render(this, SpriteBatch, position, scale);
+		});
 
 		SpriteBatch.End();
 	}
