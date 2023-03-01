@@ -88,15 +88,18 @@ public sealed class PokemonReader
 
 	public string ReadBigString() =>
 		ReadStringBytes(ReadInt32());
-	
+
 	public Vector2 ReadVector2() =>
 		new(ReadFloat(), ReadFloat());
-	
+
 	public Vector3 ReadVector3() =>
 		new(ReadFloat(), ReadFloat(), ReadFloat());
-	
+
 	public Vector4 ReadVector4() =>
 		new(ReadFloat(), ReadFloat(), ReadFloat(), ReadFloat());
+
+	public TEnum ReadEnum<TEnum>() where TEnum : struct, Enum =>
+		(TEnum)Enum.ToObject(typeof(TEnum), ReadInt32());
 
 	public void Seek(int offset, SeekOrigin origin) =>
 		Position = origin switch

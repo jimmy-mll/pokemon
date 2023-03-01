@@ -13,21 +13,9 @@ public abstract class AbstractGame : Game
 {
 	private const string LoggingTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
 	
-	public GameScene? Scene
-	{
-		get => _currentScene;
-		set
-		{
-			_currentScene?.Unload();
-
-			_currentScene = value;
-			_shouldLoadSceneNextFrame = true;
-		}
-	}
-
-	public GraphicsDeviceManager Graphics { get; }
+	protected GraphicsDeviceManager Graphics { get; }
 	
-	public new IServiceProvider Services { get; private set; }
+	protected new IServiceProvider Services { get; private set; }
 	
 	protected IConfiguration Configuration { get; private set; }
 
@@ -39,7 +27,7 @@ public abstract class AbstractGame : Game
 		Graphics = new GraphicsDeviceManager(this)
 		{
 			PreferredBackBufferHeight = height,
-			PreferredBackBufferWidth = width,
+			PreferredBackBufferWidth = width
 		};
 		Window.Title = title;
 		Window.AllowUserResizing = true;
@@ -51,14 +39,14 @@ public abstract class AbstractGame : Game
 	protected sealed override void Initialize()
 	{
 		Configuration = new ConfigurationBuilder()
-			.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+			.AddJsonFile("appsettings.json", false, true)
 			.Build();
 
 		Log.Logger = new LoggerConfiguration()
 			.Enrich.FromLogContext()
 			.WriteTo.Console(outputTemplate: LoggingTemplate)
 			.CreateLogger();
-		
+
 		var services = new ServiceCollection();
 		services.AddSingleton(typeof(AbstractGame), this);
 
@@ -69,7 +57,7 @@ public abstract class AbstractGame : Game
 		ConfigureServices(services);
 
 		Services = services.BuildServiceProvider();
-		
+
 		InitializeServices();
 
 		TextureUtils.Initialize(GraphicsDevice);

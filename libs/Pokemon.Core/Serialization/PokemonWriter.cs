@@ -85,20 +85,20 @@ public sealed class PokemonWriter
 		WriteInt32(bytes.Length);
 		WriteSpan(bytes);
 	}
-	
+
 	public void WriteVector2(Vector2 value)
 	{
 		WriteFloat(value.X);
 		WriteFloat(value.Y);
 	}
-	
+
 	public void WriteVector3(Vector3 value)
 	{
 		WriteFloat(value.X);
 		WriteFloat(value.Y);
 		WriteFloat(value.Z);
 	}
-	
+
 	public void WriteVector4(Vector4 value)
 	{
 		WriteFloat(value.X);
@@ -106,6 +106,10 @@ public sealed class PokemonWriter
 		WriteFloat(value.Z);
 		WriteFloat(value.W);
 	}
+
+	public void WriteEnum<TEnum>(TEnum value)
+		where TEnum : struct, Enum =>
+		WriteInt32((int)(object)value);
 
 	private Span<byte> GetSpan(int count)
 	{
@@ -141,7 +145,7 @@ public sealed class PokemonWriter
 	private void CheckAndResizeBuffer(int count, int? position = null)
 	{
 		position ??= Position;
-		
+
 		var bytesAvailable = Length - position.Value;
 
 		if (count <= bytesAvailable)
@@ -150,7 +154,7 @@ public sealed class PokemonWriter
 		var currentCount = Length;
 		var growBy = Math.Max(count, currentCount);
 
-		if (count is 0) 
+		if (count is 0)
 			growBy = Math.Max(growBy, 256);
 
 		var newCount = currentCount + growBy;

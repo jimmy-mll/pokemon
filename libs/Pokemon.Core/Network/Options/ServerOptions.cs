@@ -3,6 +3,6 @@
 public class ServerOptions : ClientOptions
 {
 	public required int MaxConnections { get; set; }
-	
+
 	public required int MaxConnectionsPerAddress { get; set; }
 }

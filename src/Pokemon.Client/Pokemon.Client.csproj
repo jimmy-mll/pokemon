@@ -23,14 +23,14 @@
         <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
     </ItemGroup>
     <ItemGroup>
-      <None Remove="appsettings.json" />
-      <Content Include="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
+        <None Remove="appsettings.json" />
+        <Content Include="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\libs\Pokemon.Monogame\Pokemon.Monogame.csproj" />
-      <ProjectReference Include="..\..\libs\Pokemon.Protocol\Pokemon.Protocol.csproj" />
+        <ProjectReference Include="..\..\libs\Pokemon.Monogame\Pokemon.Monogame.csproj" />
+        <ProjectReference Include="..\..\libs\Pokemon.Protocol\Pokemon.Protocol.csproj" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Components\" />

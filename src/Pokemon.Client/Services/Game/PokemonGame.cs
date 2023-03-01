@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Pokemon.Client.Handlers.Authentication;
 using Pokemon.Client.Network;
 using Pokemon.Client.Services.Game.Scenes;
 using Pokemon.Core.Extensions;
@@ -23,7 +24,7 @@ public sealed class PokemonGame : AbstractGame
 	public PokemonGame() : base(1280, 720, "Pokémon")
 	{
 	}
-	
+
 	protected override void ConfigureServices(IServiceCollection services)
 	{
 		services
@@ -31,7 +32,9 @@ public sealed class PokemonGame : AbstractGame
 			.AddSingleton<IMessageFactory, MessageFactory>()
 			.AddSingleton<IMessageDispatcher, MessageDispatcher>()
 			.AddSingleton<PokemonClient>()
-			.AddSingleton<ITextureManagerServices, TextureManagerServices>()
+            .AddSingleton<AuthenticationFailedHandler>()
+            .AddSingleton<AuthenticationSuccessHandler>()
+            .AddSingleton<ITextureManagerServices, TextureManagerServices>()
 			.AddScoped<ISceneManagerServices, SceneManagerServices>()
 			.Configure<ClientOptions>(Configuration.GetRequiredSection("Network"));
 
@@ -49,7 +52,7 @@ public sealed class PokemonGame : AbstractGame
 		var messageDispatcher = Services.GetRequiredService<IMessageDispatcher>();
 		var client = Services.GetRequiredService<PokemonClient>();
 
-		messageFactory.Initialize(typeof(HelloConnectMessage).Assembly);
+		messageFactory.Initialize(typeof(IdentificationRequestMessage).Assembly);
 		messageDispatcher.InitializeClient(typeof(PokemonGame).Assembly);
 		//client.ConnectAsync().FireAndForget();
 	}

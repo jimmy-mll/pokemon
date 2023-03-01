@@ -10,7 +10,7 @@ public interface IMessageDispatcher
 	/// <summary>Registers all handlers from the given <paramref name="assembly" />.</summary>
 	/// <param name="assembly">The assembly to find handlers in.</param>
 	void InitializeClient(Assembly assembly);
-	
+
 	/// <summary>Registers all handlers from the given <paramref name="assembly" />.</summary>
 	/// <param name="assembly">The assembly to find handlers in.</param>
 	void InitializeServer(Assembly assembly);

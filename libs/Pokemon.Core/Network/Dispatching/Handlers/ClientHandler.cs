@@ -15,6 +15,6 @@ public abstract class ClientHandler<TContext, TMessage> : ClientHandler
 {
 	internal override Func<BaseClient, PokemonMessage, Task> Delegate =>
 		(client, message) => HandleAsync((TContext)client, (TMessage)message);
-	
-	protected abstract Task HandleAsync(TContext context, TMessage message);
+
+	protected abstract Task HandleAsync(TContext client, TMessage message);
 }
