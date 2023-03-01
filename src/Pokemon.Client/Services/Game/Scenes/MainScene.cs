@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Pokemon.Monogame;
 using Pokemon.Monogame.ECS;
 using Pokemon.Monogame.ECS.Components;
+using Pokemon.Monogame.ECS.Components.Entities;
 using Pokemon.Monogame.ECS.Components.Renderers;
 using Pokemon.Monogame.Services.Textures;
 using Pokemon.Monogame.Utils;

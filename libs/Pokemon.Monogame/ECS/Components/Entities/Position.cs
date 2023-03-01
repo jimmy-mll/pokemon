@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Pokemon.Monogame.ECS.Components;
+namespace Pokemon.Monogame.ECS.Components.Entities;
 
 public struct Position : IVectorable<Position>
 {
