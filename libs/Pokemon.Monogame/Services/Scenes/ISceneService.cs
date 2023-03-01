@@ -2,7 +2,7 @@
 
 namespace Pokemon.Monogame.Services.Scenes;
 
-public interface ISceneManagerServices
+public interface ISceneService
 {
 	void SetScene<TScene>() where TScene : GameScene;
 

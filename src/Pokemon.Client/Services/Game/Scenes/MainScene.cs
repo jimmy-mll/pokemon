@@ -12,11 +12,11 @@ namespace Pokemon.Client.Services.Game.Scenes;
 
 public class MainScene : GameScene
 {
-	private static readonly Color[] _colors = { Color.White, Color.Red, Color.Blue, Color.Yellow, Color.Magenta, Color.Cyan, Color.Aqua, Color.Pink };
-	private readonly ITextureManagerServices _textureManager;
+	private static readonly Color[] Colors = { Color.White, Color.Red, Color.Blue, Color.Yellow, Color.Magenta, Color.Cyan, Color.Aqua, Color.Pink };
+	private readonly ITextureService _textureManager;
 	private Vector2 _pikachuRealSize;
 
-	public MainScene(AbstractGame game, ITextureManagerServices textureManager) : base(game) =>
+	public MainScene(AbstractGame game, ITextureService textureManager) : base(game) =>
 		_textureManager = textureManager;
 
 	protected override void OnLoad()
@@ -28,7 +28,7 @@ public class MainScene : GameScene
 
 		for (var i = 0; i < 1500; i++)
 		{
-			var renderer = new SpriteRenderer(GameSprites.Pikachu, _colors[Random.Shared.Next(_colors.Length)]);
+			var renderer = new SpriteRenderer(GameSprites.Pikachu, Colors[Random.Shared.Next(Colors.Length)]);
 
 			var posX = Random.Shared.Next(padding, Graphics.PreferredBackBufferWidth - padding);
 			var posY = Random.Shared.Next(padding, Graphics.PreferredBackBufferHeight - padding);
@@ -57,13 +57,13 @@ public class MainScene : GameScene
 			if (position.X - _pikachuRealSize.X * 0.5f < 0.0f || position.X + _pikachuRealSize.X * 0.5f > Graphics.PreferredBackBufferWidth)
 			{
 				velocity.X = -velocity.X;
-				renderer.Color = _colors[Random.Shared.Next(_colors.Length)];
+				renderer.Color = Colors[Random.Shared.Next(Colors.Length)];
 			}
 
 			if (position.Y - _pikachuRealSize.Y * 0.5f < 0.0f || position.Y + _pikachuRealSize.Y * 0.5f > Graphics.PreferredBackBufferHeight)
 			{
 				velocity.Y = -velocity.Y;
-				renderer.Color = _colors[Random.Shared.Next(_colors.Length)];
+				renderer.Color = Colors[Random.Shared.Next(Colors.Length)];
 			}
 		});
 

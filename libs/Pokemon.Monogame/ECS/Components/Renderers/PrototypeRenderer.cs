@@ -10,7 +10,7 @@ public struct PrototypeRenderer : IRenderer
 	public int Height { get; set; }
 	public Color Color { get; set; }
 
-	private static readonly Vector2 _origin = new(0.5f);
+	private static readonly Vector2 Origin = new(0.5f);
 
 	public PrototypeRenderer() : this(100, 100, Color.White)
 	{
@@ -25,6 +25,6 @@ public struct PrototypeRenderer : IRenderer
 
 	public void Render(GameScene scene, SpriteBatch spriteBatch, Position position, Scale scale)
 	{
-		spriteBatch.Draw(TextureUtils.OnePixel, position, null, Color, 0f, _origin, new Vector2(Width, Height) * scale, 0, 0f);
+		spriteBatch.Draw(TextureUtils.OnePixel, position, null, Color, 0f, Origin, new Vector2(Width, Height) * scale, 0, 0f);
 	}
 }

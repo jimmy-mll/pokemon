@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Pokemon.Monogame.Services.Textures;
 
-public class TextureManagerServices : ITextureManagerServices
+public class TextureService : ITextureService
 {
 	private readonly Dictionary<TextureRef, Texture2D> _refToTexDictionary = new();
 

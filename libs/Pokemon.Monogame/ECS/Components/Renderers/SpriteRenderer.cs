@@ -12,7 +12,7 @@ public struct SpriteRenderer : IRenderer
 	public Color Color { get; set; }
 	public TextureRef TextureRef { get; set; }
 
-	private static readonly Vector2 _originScale = new(0.5f);
+	private static readonly Vector2 OriginScale = new(0.5f);
 
 	public SpriteRenderer() : this(TextureRef.None, Color.White)
 	{
@@ -42,11 +42,11 @@ public struct SpriteRenderer : IRenderer
 			return;
 		}
 
-		var texturesManager = scene.Services.GetRequiredService<ITextureManagerServices>();
+		var texturesManager = scene.Services.GetRequiredService<ITextureService>();
 
 		var texture = texturesManager.GetTexture(TextureRef);
 		var textureSize = new Vector2(texture.Width, texture.Height); //TODO: Create extension method to get the texture size
 
-		spriteBatch.Draw(texture, position, null, Color, 0f, _originScale * textureSize, scale, 0, 0f);
+		spriteBatch.Draw(texture, position, null, Color, 0f, OriginScale * textureSize, scale, 0, 0f);
 	}
 }

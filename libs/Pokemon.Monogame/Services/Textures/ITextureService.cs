@@ -2,7 +2,7 @@
 
 namespace Pokemon.Monogame.Services.Textures;
 
-public interface ITextureManagerServices
+public interface ITextureService
 {
 	void AddTexture(TextureRef textureRef, Texture2D texture);
 

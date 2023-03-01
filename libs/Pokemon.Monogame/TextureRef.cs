@@ -2,14 +2,14 @@
 
 public readonly struct TextureRef
 {
-	public readonly int id;
+	private readonly int _id;
 
-	public TextureRef(int id)
-		=> this.id = id;
+	private TextureRef(int id)
+		=> _id = id;
 
 	public static readonly TextureRef None = new(-1);
 
 	public static implicit operator TextureRef(int id) => new(id);
 
-	public static implicit operator int(TextureRef textureRef) => textureRef.id;
+	public static implicit operator int(TextureRef textureRef) => textureRef._id;
 }

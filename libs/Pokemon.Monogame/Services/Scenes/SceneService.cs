@@ -4,12 +4,12 @@ using Pokemon.Monogame.ECS;
 
 namespace Pokemon.Monogame.Services.Scenes;
 
-public class SceneManagerServices : ISceneManagerServices
+public class SceneService : ISceneService
 {
 	private readonly AbstractGame _game;
 	private readonly IServiceProvider _serviceProvider;
 
-	public SceneManagerServices(AbstractGame game, IServiceProvider serviceProvider)
+	public SceneService(AbstractGame game, IServiceProvider serviceProvider)
 	{
 		_game = game;
 		_serviceProvider = serviceProvider;

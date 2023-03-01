@@ -31,12 +31,12 @@ public sealed class PokemonGame : AbstractGame
 			.AddSingleton<PokemonClient>()
 			.AddSingleton<AuthenticationFailedHandler>()
 			.AddSingleton<AuthenticationSuccessHandler>()
-			.AddSingleton<ITextureManagerServices, TextureManagerServices>()
-			.AddSingleton<ISceneManagerServices, SceneManagerServices>()
+			.AddSingleton<ITextureService, TextureService>()
+			.AddSingleton<ISceneService, SceneService>()
 			.AddSingleton<MainScene>()
 			.Configure<ClientOptions>(Configuration.GetRequiredSection("Network"));
 	}
-	
+
 	protected override void InitializeServices()
 	{
 		var messageFactory = Services.GetRequiredService<IMessageFactory>();
@@ -52,7 +52,7 @@ public sealed class PokemonGame : AbstractGame
 	{
 		Scene = Services.GetRequiredService<MainScene>();
 
-		var textureManager = Services.GetRequiredService<ITextureManagerServices>();
+		var textureManager = Services.GetRequiredService<ITextureService>();
 		textureManager.AddTexture(GameSprites.Pikachu, Content.Load<Texture2D>("pikachu"));
 
 		base.LoadContent();
