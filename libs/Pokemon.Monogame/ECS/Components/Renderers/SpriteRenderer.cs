@@ -40,7 +40,7 @@ public struct SpriteRenderer : IRenderer
             return;
         }
 
-        var texturesManager = scene.Services.GetRequiredService<ITextureManager>();
+        var texturesManager = scene.Services.GetRequiredService<ITextureManagerServices>();
 
         var texture = texturesManager.GetTexture(TextureRef);
         var textureSize = new Vector2(texture.Width, texture.Height); //TODO: Create extension method to get the texture size

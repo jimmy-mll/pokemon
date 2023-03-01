@@ -17,6 +17,7 @@ public abstract class GameScene
     public SpriteBatch SpriteBatch { get; private set; }
     public ContentManager Content => Game.Content;
     public IServiceProvider Services => Game.Services;
+    public GraphicsDeviceManager Graphics => Game.Graphics;
     public GraphicsDevice GraphicsDevice => Game.GraphicsDevice;
 
     public GameScene(AbstractGame game)

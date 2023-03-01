@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <OutputType>WinExe</OutputType>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
         <RollForward>Major</RollForward>
         <PublishReadyToRun>false</PublishReadyToRun>
@@ -33,8 +33,8 @@
       <ProjectReference Include="..\..\libs\Pokemon.Protocol\Pokemon.Protocol.csproj" />
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="Components" />
-      <Folder Include="Handlers" />
+      <Folder Include="Components\" />
+      <Folder Include="Handlers\" />
       <Folder Include="Models" />
       <Folder Include="Notifications" />
     </ItemGroup>
