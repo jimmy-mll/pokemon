@@ -1,7 +1,4 @@
-﻿using Arch.Core;
-using Arch.Core.Extensions;
-using Microsoft.Xna.Framework;
-using Pokemon.Monogame.ECS.Components.Interfaces;
+﻿using Microsoft.Xna.Framework;
 using Pokemon.Monogame.ECS.Components.Renderers;
 using Pokemon.Monogame.Models;
 
@@ -9,9 +6,11 @@ namespace Pokemon.Monogame.ECS.Components.Entities;
 
 public class AnimationController
 {
-    public bool IsPlaying => _isPlaying;
+	private readonly SpriteRenderer _spriteRenderer;
+	private AnimationData? _animation;
+	private float _delta;
 
-    public int CurrentFrame => _currentFrame;
+	private float _timer;
 
     public Animation Animation => _animation ?? default;
 
@@ -31,47 +30,47 @@ public class AnimationController
         _isPlaying = true;
         _spriteRenderer = renderer;
 
-        this.UpdateRenderer();
-    }
+		UpdateRenderer();
+	}
 
     public void Play(in Animation animation)
     {
         if (animation == _animation)
             return;
 
-        _animation = animation;
-        _timer = 0f;
-        _delta = 1f / animation.FramesPerSecond;
-        _currentFrame = 0;
-        _isPlaying = true;
-    }
+		_animation = animation;
+		_timer = 0f;
+		_delta = 1f / animation.FramesPerSecond;
+		CurrentFrame = 0;
+		IsPlaying = true;
+	}
 
-    public void Stop()
-    {
-        _isPlaying = false;
-        _timer = 0f;
-        _currentFrame = 0;
-    }
+	public void Stop()
+	{
+		IsPlaying = false;
+		_timer = 0f;
+		CurrentFrame = 0;
+	}
 
-    private void UpdateRenderer()
-    {
-        _spriteRenderer.TextureRef = Animation.Spritesheet.TextureRef;
-        _spriteRenderer.SourceRectangle = Animation.Spritesheet.GetSourceRectangle(Animation.FrameIndices[_currentFrame]);
-    }
+	private void UpdateRenderer()
+	{
+		_spriteRenderer.TextureRef = Animation.SpriteSheet.TextureRef;
+		_spriteRenderer.SourceRectangle = Animation.SpriteSheet.GetSourceRectangle(Animation.FrameIndices[CurrentFrame]);
+	}
 
-    public void Update(GameTime gameTime)
-    {
-        if (!_isPlaying)
-            return;
+	public void Update(GameTime gameTime)
+	{
+		if (!IsPlaying)
+			return;
 
-        UpdateRenderer();
+		UpdateRenderer();
 
-        _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+		_timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        if (_timer >= _delta)
-        {
-            _timer -= _delta;
-            _currentFrame = (_currentFrame + 1) % Animation.FrameIndices.Length;
-        }
-    }
+		if (_timer >= _delta)
+		{
+			_timer -= _delta;
+			CurrentFrame = (CurrentFrame + 1) % Animation.FrameIndices.Length;
+		}
+	}
 }

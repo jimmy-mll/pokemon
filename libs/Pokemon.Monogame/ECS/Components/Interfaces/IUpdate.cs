@@ -1,10 +1,8 @@
-﻿using Arch.Core;
-using Microsoft.Xna.Framework;
-using Pokemon.Monogame.ECS.Components.Renderers;
+﻿using Microsoft.Xna.Framework;
 
 namespace Pokemon.Monogame.ECS.Components.Interfaces;
 
 public interface IUpdate
 {
-    void Update(GameTime gameTime);
+	void Update(GameTime gameTime);
 }

@@ -9,9 +9,9 @@ namespace Pokemon.Monogame.Services.Keyboard;
 public sealed class KeyboardService : IKeyboardService
 {
 	private const string KeyboardMappingsFileName = "keyboard.json";
-	
+
 	private Dictionary<KeyboardMappings, Keys> _mappings;
-	
+
 	public KeyboardService() =>
 		_mappings = new Dictionary<KeyboardMappings, Keys>();
 
@@ -27,11 +27,11 @@ public sealed class KeyboardService : IKeyboardService
 				[KeyboardMappings.Down] = Keys.S,
 				[KeyboardMappings.Run] = Keys.LeftShift
 			};
-			
+
 			SaveMappings();
 			return;
 		}
-		
+
 		_mappings = JsonSerializer.Deserialize<Dictionary<KeyboardMappings, Keys>>(File.ReadAllText(KeyboardMappingsFileName));
 	}
 
@@ -43,7 +43,7 @@ public sealed class KeyboardService : IKeyboardService
 
 	public KeyboardMappings GetMappingForKey(Keys key)
 	{
-		return _mappings.ContainsValue(key) 
+		return _mappings.ContainsValue(key)
 			? _mappings.First(x => x.Value == key).Key
 			: KeyboardMappings.None;
 	}

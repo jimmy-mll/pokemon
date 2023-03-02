@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
+﻿using System.Collections.Generic;
 using Arch.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Pokemon.Client.Services.Game;
 using Pokemon.Monogame;
 using Pokemon.Monogame.ECS;
 using Pokemon.Monogame.ECS.Components.Entities;
@@ -13,7 +12,7 @@ using Pokemon.Monogame.ECS.Components.Renderers;
 using Pokemon.Monogame.Models;
 using Pokemon.Monogame.Services.Keyboard;
 
-namespace Pokemon.Client.Services.Game.Scenes;
+namespace Pokemon.Client.Components.Scenes;
 
 public enum PlayerDirection
 {
@@ -31,12 +30,10 @@ public class MainScene : GameScene
 	private PlayerDirection _playerDirection;
 	private AnimationController _animationController;
 
-	private readonly IKeyboardService _keyboardService;
-	
-	public MainScene(AbstractGame game, IKeyboardService keyboardService) : base(game)
-	{
+	private PlayerDirection _playerDirection;
+
+	public MainScene(AbstractGame game, IKeyboardService keyboardService) : base(game) =>
 		_keyboardService = keyboardService;
-	}
 
 	protected override void OnLoad()
 	{
@@ -82,15 +79,13 @@ public class MainScene : GameScene
 		var dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 		var queryDesc = new QueryDescription().WithAll<AnimationController>();
-		World.Query(queryDesc, (ref AnimationController animationController) =>
-		{
-			animationController.Update(gameTime);
-		});
+
+		World.Query(queryDesc, (ref AnimationController animationController) => { animationController.Update(gameTime); });
 
 		queryDesc = new QueryDescription()
 			.WithAll<IRenderer, Position, Scale>();
-		
-		World.Query(queryDesc, (ref IRenderer renderer, ref Position position, ref Scale scale) =>
+
+		World.Query(queryDesc, (ref IRenderer _, ref Position position, ref Scale _) =>
 		{
 			bool isRunning = false;
 
@@ -107,7 +102,7 @@ public class MainScene : GameScene
 						_playerDirection = PlayerDirection.Up;
 						input.Y = -1;
 						break;
-					
+
 					case KeyboardMappings.Down:
                         _playerDirection = PlayerDirection.Down;
                         input.Y = 1;
@@ -115,9 +110,9 @@ public class MainScene : GameScene
 					
 					case KeyboardMappings.Left:
 						_playerDirection = PlayerDirection.Left;
-                        input.X = -1;
-                        break;
-					
+						input.X = -1;
+						break;
+
 					case KeyboardMappings.Right:
 						_playerDirection = PlayerDirection.Right;
 						input.X = 1;
