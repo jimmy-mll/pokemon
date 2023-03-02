@@ -11,6 +11,10 @@ public struct Scale : IVectorable<Scale>
 	{
 	}
 
+	public Scale(float ratio) : this(ratio, ratio)
+	{
+	}
+
 	public Scale(float x, float y)
 	{
 		X = x;

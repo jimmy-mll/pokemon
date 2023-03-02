@@ -6,5 +6,5 @@ public enum KeyboardMappings
 	Left,
 	Right,
 	Up,
-	Down,
+	Down
 }

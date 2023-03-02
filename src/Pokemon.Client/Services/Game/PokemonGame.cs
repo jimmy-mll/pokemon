@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xna.Framework.Graphics;
+using Pokemon.Client.Components.Scenes;
 using Pokemon.Client.Handlers.Authentication;
 using Pokemon.Client.Network;
-using Pokemon.Client.Services.Game.Scenes;
 using Pokemon.Core.Extensions;
 using Pokemon.Core.Network.Dispatching;
 using Pokemon.Core.Network.Factory;

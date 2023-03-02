@@ -1,73 +1,60 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
+using Microsoft.Xna.Framework;
 
 namespace Pokemon.Monogame.Models;
 
 public readonly struct SpriteSheet : IEquatable<SpriteSheet>
 {
-    private readonly Rectangle[] _sourceRectangles;
-    
-    public int Rows { get; }
+	private readonly Rectangle[] _sourceRectangles;
 
-    public int Columns { get; }
+	public int Rows { get; }
 
-    public Vector2 GridSize { get; }
+	public int Columns { get; }
 
-    public Vector2 TileSize { get; }
+	public Vector2 GridSize { get; }
 
-    public TextureRef TextureRef { get; }
+	public Vector2 TileSize { get; }
 
-    public SpriteSheet(TextureRef textureRef, Vector2 gridSize, Vector2 tileSize)
-    {
-        GridSize = gridSize;
-        TileSize = tileSize;
+	public TextureRef TextureRef { get; }
 
-        Rows = (int)(gridSize.Y / tileSize.Y);
-        Columns = (int)(gridSize.X / tileSize.X);
+	public SpriteSheet(TextureRef textureRef, Vector2 gridSize, Vector2 tileSize)
+	{
+		GridSize = gridSize;
+		TileSize = tileSize;
 
-        TextureRef = textureRef;
+		Rows = (int)(gridSize.Y / tileSize.Y);
+		Columns = (int)(gridSize.X / tileSize.X);
 
-        var size = Rows * Columns;
-        _sourceRectangles = new Rectangle[size];
+		TextureRef = textureRef;
 
-        for (var x = 0; x < Columns; x++)
-        {
-            for (var y = 0; y < Rows; y++)
-            {
-                _sourceRectangles[y * Columns + x] = new Rectangle((int)(x * tileSize.X), (int)(y * tileSize.Y), (int)tileSize.X, (int)tileSize.Y);
-            }
-        }
-    }
+		var size = Rows * Columns;
+		_sourceRectangles = new Rectangle[size];
 
-    public ref Rectangle GetSourceRectangle(int index)
-    {
-        return ref _sourceRectangles[index];
-    }
+		for (var x = 0; x < Columns; x++)
+		{
+			for (var y = 0; y < Rows; y++) _sourceRectangles[y * Columns + x] = new Rectangle((int)(x * tileSize.X), (int)(y * tileSize.Y), (int)tileSize.X, (int)tileSize.Y);
+		}
+	}
 
-    public bool Equals(SpriteSheet other)
-    {
-        return Rows == other.Rows &&
-               Columns == other.Columns &&
-               GridSize == other.GridSize &&
-               TileSize == other.TileSize &&
-               TextureRef == other.TextureRef;
-    }
+	public ref Rectangle GetSourceRectangle(int index) =>
+		ref _sourceRectangles[index];
 
-    public override bool Equals(object obj)
-    {
-        return obj is SpriteSheet sheet && Equals(sheet);
-    }
+	public bool Equals(SpriteSheet other) =>
+		Rows == other.Rows &&
+		Columns == other.Columns &&
+		GridSize == other.GridSize &&
+		TileSize == other.TileSize &&
+		TextureRef == other.TextureRef;
 
-    public override int GetHashCode() =>
-        HashCode.Combine(_sourceRectangles, Rows, Columns, GridSize, TileSize, TextureRef);
+	public override bool Equals(object obj) =>
+		obj is SpriteSheet sheet && Equals(sheet);
 
-    public static bool operator ==(SpriteSheet left, SpriteSheet right)
-    {
-        return left.Equals(right);
-    }
+	public override int GetHashCode() =>
+		HashCode.Combine(_sourceRectangles, Rows, Columns, GridSize, TileSize, TextureRef);
 
-    public static bool operator !=(SpriteSheet left, SpriteSheet right)
-    {
-        return !(left == right);
-    }
+	public static bool operator ==(SpriteSheet left, SpriteSheet right) =>
+		left.Equals(right);
+
+	public static bool operator !=(SpriteSheet left, SpriteSheet right) =>
+		!(left == right);
 }
