@@ -25,6 +25,7 @@ public sealed class KeyboardService : IKeyboardService
 				[KeyboardMappings.Right] = Keys.D,
 				[KeyboardMappings.Up] = Keys.Z,
 				[KeyboardMappings.Down] = Keys.S,
+				[KeyboardMappings.Run] = Keys.LeftShift
 			};
 			
 			SaveMappings();

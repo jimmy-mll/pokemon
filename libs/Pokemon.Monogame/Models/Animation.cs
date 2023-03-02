@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Pokemon.Monogame.Models;
 
-public readonly struct AnimationData : IEquatable<AnimationData>
+public readonly struct Animation : IEquatable<Animation>
 {
     public bool IsLooping { get; }
     public int FramesPerSecond { get; }
     public int[] FrameIndices { get; }
     public SpriteSheet Spritesheet { get; }
 
-    public AnimationData(int framesPerSecond, bool isLooping, SpriteSheet spriteSheet, params int[] frameIndices)
+    public Animation(int framesPerSecond, bool isLooping, SpriteSheet spriteSheet, params int[] frameIndices)
     {
         IsLooping = isLooping;
         FramesPerSecond = framesPerSecond;
@@ -17,7 +18,7 @@ public readonly struct AnimationData : IEquatable<AnimationData>
         FrameIndices = frameIndices;
     }
 
-    public bool Equals(AnimationData other)
+    public bool Equals(Animation other)
     {
         return IsLooping == other.IsLooping &&
                FramesPerSecond == other.FramesPerSecond &&
@@ -27,15 +28,15 @@ public readonly struct AnimationData : IEquatable<AnimationData>
 
     public override bool Equals(object obj)
     {
-        return obj is AnimationData && Equals((AnimationData)obj);
+        return obj is Animation && Equals((Animation)obj);
     }
 
-    public static bool operator ==(AnimationData left, AnimationData right)
+    public static bool operator ==(Animation left, Animation right)
     {
         return left.Equals(right);
     }
 
-    public static bool operator !=(AnimationData left, AnimationData right)
+    public static bool operator !=(Animation left, Animation right)
     {
         return !(left == right);
     }

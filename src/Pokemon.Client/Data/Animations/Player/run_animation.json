@@ -1,0 +1,30 @@
+{
+  "Name": "Run",
+  "FPS": 8,
+  "IsLooping": true,
+  "SpriteSheet": {
+    "TextureReference": 2,
+    "GridWidth": 128,
+    "GridHeight": 128,
+    "TileWidth": 32,
+    "TileHeight": 32
+  },
+  "Animations": [
+    {
+      "Key": "Down",
+      "FrameIndices": [ 0, 1, 2, 3 ]
+    },
+    {
+      "Key": "Up",
+      "FrameIndices": [ 4, 5, 6, 7 ]
+    },
+    {
+      "Key": "Left",
+      "FrameIndices": [ 8, 9, 10, 11 ]
+    },
+    {
+      "Key": "Right",
+      "FrameIndices": [ 12, 13, 14, 15 ]
+    }
+  ]
+}

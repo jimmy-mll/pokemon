@@ -25,11 +25,11 @@ public enum PlayerDirection
 
 public class MainScene : GameScene
 {
-	private const float MoveSpeed = 150f;
+	private const float WalkSpeed = 150f;
+	private const float RunSpeed = 250f;
 
 	private PlayerDirection _playerDirection;
 	private AnimationController _animationController;
-	private Dictionary<string, AnimationData> _animationBindings;
 
 	private readonly IKeyboardService _keyboardService;
 	
@@ -42,31 +42,35 @@ public class MainScene : GameScene
 	{
 		Services.GetRequiredService<IKeyboardService>().LoadMappings();
 
-		var spriteSheet = new SpriteSheet(GameSprites.PlayerWalk, new(128), new(32));
+		/*
+		 * Avant d'utiliser les animations group
+		 * 
+				var idleDown = new Animation(1, true, spriteSheet, 0);
+				var idleUp = new Animation(1, true, spriteSheet, 4);
+				var idleLeft = new Animation(1, true, sprit(eSheet, 8);
+				var idleRight = new Animation(1, true, spriteSheet, 12);
+				var walkDown = new Animation(8, true, spriteSheet, 0, 1, 2, 3);
+				var walkUp = new Animation(8, true, spriteSheet, 4, 5, 6, 7);
+				var walkLeft = new Animation(8, true, spriteSheet, 8, 9, 10, 11);
+				var walkRight = new Animation(8, true, spriteSheet, 12, 13, 14, 15);
 
-		var idleDown = new AnimationData(1, true, spriteSheet, 0);
-		var idleUp = new AnimationData(1, true, spriteSheet, 4);
-		var idleLeft = new AnimationData(1, true, spriteSheet, 8);
-		var idleRight = new AnimationData(1, true, spriteSheet, 12);
-		var walkDown = new AnimationData(8, true, spriteSheet, 0, 1, 2, 3);
-		var walkUp = new AnimationData(8, true, spriteSheet, 4, 5, 6, 7);
-        var walkLeft = new AnimationData(8, true, spriteSheet, 8, 9, 10, 11);
-        var walkRight = new AnimationData(8, true, spriteSheet, 12, 13, 14, 15);
-
-        _animationBindings = new Dictionary<string, AnimationData>()
-		{
-			{ "IdleDown", idleDown },
-			{ "IdleUp", idleUp },
-			{ "IdleLeft", idleLeft },
-            { "IdleRight", idleRight },
-            { "WalkDown", walkDown },
-            { "WalkUp", walkUp },
-            { "WalkLeft", walkLeft },
-            { "WalkRight", walkRight },
-        };
+				_animationBindings = new Dictionary<string, Animation>()
+				{
+					{ "IdleDown", idleDown },
+					{ "IdleUp", idleUp },
+					{ "IdleLeft", idleLeft },
+					{ "IdleRight", idleRight },
+					{ "WalkDown", walkDown },
+					{ "WalkUp", walkUp },
+					{ "WalkLeft", walkLeft },
+					{ "WalkRight", walkRight },
+				};
+		*/
 
 		var spriteRenderer = new SpriteRenderer();
-		_animationController = new AnimationController(spriteRenderer, _animationBindings["WalkDown"]);
+
+		_playerDirection = PlayerDirection.Down;
+		_animationController = new AnimationController(spriteRenderer, GameAnimations.PlayerIdle["Down"]);
         
 		World.Create<IRenderer, AnimationController, Position, Scale>(spriteRenderer, _animationController, new(), new Scale(2.5f, 2.5f));
 
@@ -88,7 +92,10 @@ public class MainScene : GameScene
 		
 		World.Query(queryDesc, (ref IRenderer renderer, ref Position position, ref Scale scale) =>
 		{
+			bool isRunning = false;
+
 			Vector2 input = Vector2.Zero;
+			var moveSpeed = WalkSpeed;
 
 			foreach (var pressedKey in Keyboard.GetState().GetPressedKeys())
 			{
@@ -97,54 +104,43 @@ public class MainScene : GameScene
 				switch (mapping)
 				{
 					case KeyboardMappings.Up:
-						position.Y -= MoveSpeed * dt;
 						_playerDirection = PlayerDirection.Up;
 						input.Y = -1;
 						break;
 					
 					case KeyboardMappings.Down:
-						position.Y += MoveSpeed * dt;
                         _playerDirection = PlayerDirection.Down;
                         input.Y = 1;
                         break;
 					
 					case KeyboardMappings.Left:
-						position.X -= MoveSpeed * dt;
 						_playerDirection = PlayerDirection.Left;
                         input.X = -1;
                         break;
 					
 					case KeyboardMappings.Right:
-						position.X += MoveSpeed * dt;
 						_playerDirection = PlayerDirection.Right;
 						input.X = 1;
 						break;
-					
+
+					case KeyboardMappings.Run:
+						moveSpeed = RunSpeed;
+						isRunning = true;
+						break;
+
 					case KeyboardMappings.None:
 					default:
 						continue;
 				}
 			}
 
-			if (input == Vector2.Zero)
-			{
-				switch (_playerDirection)
-				{
-					case PlayerDirection.Left: _animationController.Play(_animationBindings["IdleLeft"]); break;
-                    case PlayerDirection.Right: _animationController.Play(_animationBindings["IdleRight"]); break;
-                    case PlayerDirection.Up: _animationController.Play(_animationBindings["IdleUp"]); break;
-                    case PlayerDirection.Down: _animationController.Play(_animationBindings["IdleDown"]); break;
-                }
-			}
+			position += input * moveSpeed * dt;
+
+			if (input == Vector2.Zero) _animationController.Play(GameAnimations.PlayerIdle[_playerDirection.ToString()]);
 			else
 			{
-                switch (_playerDirection)
-                {
-                    case PlayerDirection.Left: _animationController.Play(_animationBindings["WalkLeft"]); break;
-                    case PlayerDirection.Right: _animationController.Play(_animationBindings["WalkRight"]); break;
-                    case PlayerDirection.Up: _animationController.Play(_animationBindings["WalkUp"]); break;
-                    case PlayerDirection.Down: _animationController.Play(_animationBindings["WalkDown"]); break;
-                }
+				if (isRunning) _animationController.Play(GameAnimations.PlayerRun[_playerDirection.ToString()]);
+                else _animationController.Play(GameAnimations.PlayerWalk[_playerDirection.ToString()]);
             }
 		});
 
