@@ -30,7 +30,7 @@ public class MainScene : GameScene
 	private PlayerDirection _playerDirection;
 	private AnimationController _animationController;
 
-	private PlayerDirection _playerDirection;
+	private readonly IKeyboardService _keyboardService;
 
 	public MainScene(AbstractGame game, IKeyboardService keyboardService) : base(game) =>
 		_keyboardService = keyboardService;

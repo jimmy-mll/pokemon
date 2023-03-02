@@ -6,12 +6,8 @@ namespace Pokemon.Monogame.ECS.Components.Entities;
 
 public class AnimationController
 {
-	private readonly SpriteRenderer _spriteRenderer;
-	private AnimationData? _animation;
-	private float _delta;
-
-	private float _timer;
-
+	public int CurrentFrame => _currentFrame;
+	public bool IsPlaying => _isPlaying;
     public Animation Animation => _animation ?? default;
 
     private float _timer;
@@ -41,21 +37,21 @@ public class AnimationController
 		_animation = animation;
 		_timer = 0f;
 		_delta = 1f / animation.FramesPerSecond;
-		CurrentFrame = 0;
-		IsPlaying = true;
+		_currentFrame = 0;
+		_isPlaying = true;
 	}
 
 	public void Stop()
 	{
-		IsPlaying = false;
+		_isPlaying = false;
 		_timer = 0f;
-		CurrentFrame = 0;
+		_currentFrame = 0;
 	}
 
 	private void UpdateRenderer()
 	{
-		_spriteRenderer.TextureRef = Animation.SpriteSheet.TextureRef;
-		_spriteRenderer.SourceRectangle = Animation.SpriteSheet.GetSourceRectangle(Animation.FrameIndices[CurrentFrame]);
+		_spriteRenderer.TextureRef = Animation.Spritesheet.TextureRef;
+		_spriteRenderer.SourceRectangle = Animation.Spritesheet.GetSourceRectangle(Animation.FrameIndices[CurrentFrame]);
 	}
 
 	public void Update(GameTime gameTime)
@@ -70,7 +66,7 @@ public class AnimationController
 		if (_timer >= _delta)
 		{
 			_timer -= _delta;
-			CurrentFrame = (CurrentFrame + 1) % Animation.FrameIndices.Length;
+			_currentFrame = (_currentFrame + 1) % Animation.FrameIndices.Length;
 		}
 	}
 }
