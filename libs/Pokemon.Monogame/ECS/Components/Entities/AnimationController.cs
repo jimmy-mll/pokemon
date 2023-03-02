@@ -55,8 +55,8 @@ public class AnimationController
 
     private void UpdateRenderer()
     {
-        _spriteRenderer.TextureRef = Animation.Spritesheet.TextureRef;
-        _spriteRenderer.SourceRectangle = Animation.Spritesheet.GetSourceRectangle(Animation.FrameIndices[_currentFrame]);
+        _spriteRenderer.TextureRef = Animation.SpriteSheet.TextureRef;
+        _spriteRenderer.SourceRectangle = Animation.SpriteSheet.GetSourceRectangle(Animation.FrameIndices[_currentFrame]);
     }
 
     public void Update(GameTime gameTime)
