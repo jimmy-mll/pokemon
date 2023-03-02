@@ -15,11 +15,20 @@ public abstract class GameScene
     public World World { get; private set; }
 
     public AbstractGame Game { get; }
+    
     public SpriteBatch SpriteBatch { get; private set; }
-    public ContentManager Content => Game.Content;
-    public IServiceProvider Services => Game.Services;
-    public GraphicsDeviceManager Graphics => Game.Graphics;
-    public GraphicsDevice GraphicsDevice => Game.GraphicsDevice;
+    
+    public ContentManager Content => 
+        Game.Content;
+    
+    public IServiceProvider Services =>
+        Game.Services;
+    
+    public GraphicsDeviceManager Graphics =>
+        Game.Graphics;
+    
+    public GraphicsDevice GraphicsDevice =>
+        Game.GraphicsDevice;
 
     public GameScene(AbstractGame game)
     {
@@ -51,31 +60,32 @@ public abstract class GameScene
         World = World.Create();
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-        this.OnLoad();
+        OnLoad();
     }
 
     public void Unload()
     {
-        this.OnUnload();
+        OnUnload();
         World.Destroy(World);
     }
 
     public void Update(GameTime gameTime)
     {
-        this.OnUpdate(gameTime);
+        OnUpdate(gameTime);
     }
 
     public void Draw(GameTime gameTime)
     {
-        this.OnDraw(gameTime);
+        OnDraw(gameTime);
 
         SpriteBatch.Begin(transformMatrix: Matrix.CreateTranslation(Graphics.PreferredBackBufferWidth * 0.5f,
                                                                     Graphics.PreferredBackBufferHeight * 0.5f,
                                                                     0f),
                           samplerState: SamplerState.PointClamp);
 
-        var queryDesc = new QueryDescription().WithAll<IRenderer>()
-                                              .WithAny<IRenderer, Position, Scale>();
+        var queryDesc = new QueryDescription()
+            .WithAll<IRenderer>()
+            .WithAny<IRenderer, Position, Scale>();
 
         World.Query(in queryDesc, (ref IRenderer renderer, ref Position position, ref Scale scale) =>
         {
