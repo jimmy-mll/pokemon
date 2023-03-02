@@ -5,6 +5,8 @@ namespace Pokemon.Monogame.Models;
 
 public readonly struct SpriteSheet : IEquatable<SpriteSheet>
 {
+    private readonly Rectangle[] _sourceRectangles;
+    
     public int Rows { get; }
 
     public int Columns { get; }
@@ -14,10 +16,6 @@ public readonly struct SpriteSheet : IEquatable<SpriteSheet>
     public Vector2 TileSize { get; }
 
     public TextureRef TextureRef { get; }
-
-
-    private readonly int _size;
-    private readonly Rectangle[] _sourceRectangles;
 
     public SpriteSheet(TextureRef textureRef, Vector2 gridSize, Vector2 tileSize)
     {
@@ -29,8 +27,8 @@ public readonly struct SpriteSheet : IEquatable<SpriteSheet>
 
         TextureRef = textureRef;
 
-        _size = Rows * Columns;
-        _sourceRectangles = new Rectangle[_size];
+        var size = Rows * Columns;
+        _sourceRectangles = new Rectangle[size];
 
         for (var x = 0; x < Columns; x++)
         {
@@ -53,5 +51,23 @@ public readonly struct SpriteSheet : IEquatable<SpriteSheet>
                GridSize == other.GridSize &&
                TileSize == other.TileSize &&
                TextureRef == other.TextureRef;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is SpriteSheet sheet && Equals(sheet);
+    }
+
+    public override int GetHashCode() =>
+        HashCode.Combine(_sourceRectangles, Rows, Columns, GridSize, TileSize, TextureRef);
+
+    public static bool operator ==(SpriteSheet left, SpriteSheet right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(SpriteSheet left, SpriteSheet right)
+    {
+        return !(left == right);
     }
 }
