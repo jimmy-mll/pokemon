@@ -13,16 +13,16 @@ public class AnimationController
 
     public int CurrentFrame => _currentFrame;
 
-    public AnimationData Animation => _animation ?? default;
+    public Animation Animation => _animation ?? default;
 
     private float _timer;
     private float _delta;
     private bool _isPlaying;
     private int _currentFrame;
-    private AnimationData? _animation;
+    private Animation? _animation;
     private SpriteRenderer _spriteRenderer;
 
-    public AnimationController(SpriteRenderer renderer, AnimationData startAnimation)
+    public AnimationController(SpriteRenderer renderer, Animation startAnimation)
     {
         _animation = startAnimation;
         _timer = 0f;
@@ -34,7 +34,7 @@ public class AnimationController
         this.UpdateRenderer();
     }
 
-    public void Play(in AnimationData animation)
+    public void Play(in Animation animation)
     {
         if (animation == _animation)
             return;
