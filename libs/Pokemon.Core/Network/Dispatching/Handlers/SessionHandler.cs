@@ -5,16 +5,17 @@ namespace Pokemon.Core.Network.Dispatching.Handlers;
 
 public abstract class SessionHandler
 {
-	internal virtual Func<BaseSession, PokemonMessage, Task> Delegate =>
+	internal virtual Func<IBaseServer, BaseSession, PokemonMessage, Task> Delegate =>
 		null!;
 }
 
-public abstract class SessionHandler<TContext, TMessage> : SessionHandler
-	where TContext : BaseSession
+public abstract class SessionHandler<TServer, TSession, TMessage> : SessionHandler
+	where TServer : BaseServer<TSession>
+	where TSession : BaseSession
 	where TMessage : PokemonMessage
 {
-	internal override Func<BaseSession, PokemonMessage, Task> Delegate =>
-		(client, message) => HandleAsync((TContext)client, (TMessage)message);
+	internal override Func<IBaseServer, BaseSession, PokemonMessage, Task> Delegate =>
+		(server, session, message) => HandleAsync((TServer)server, (TSession)session, (TMessage)message);
 
-	protected abstract Task HandleAsync(TContext session, TMessage message);
+	protected abstract Task HandleAsync(TServer server, TSession session, TMessage message);
 }
