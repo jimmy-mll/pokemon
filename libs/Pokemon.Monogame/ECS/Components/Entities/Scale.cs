@@ -7,7 +7,14 @@ public struct Scale : IVectorable<Scale>
 	public float X { get; set; }
 	public float Y { get; set; }
 
-	public Scale() : this(1.0f, 1.0f)
+    public static Scale Zero => _zero;
+
+    public static Scale One => _one;
+
+    private static readonly Scale _zero = new();
+    private static readonly Scale _one = new(1.0f, 1.0f);
+
+    public Scale() : this(1.0f, 1.0f)
 	{
 	}
 

@@ -7,7 +7,14 @@ public struct Velocity : IVectorable<Velocity>
 	public float X { get; set; }
 	public float Y { get; set; }
 
-	public Velocity(float x, float y)
+    public static Velocity Zero => _zero;
+
+    public static Velocity One => _one;
+
+    private static readonly Velocity _zero = new();
+    private static readonly Velocity _one = new(1.0f, 1.0f);
+
+    public Velocity(float x, float y)
 	{
 		X = x;
 		Y = y;
