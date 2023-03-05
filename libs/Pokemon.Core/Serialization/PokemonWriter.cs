@@ -1,5 +1,4 @@
 ﻿using System.Buffers.Binary;
-using System.Numerics;
 using System.Text;
 
 namespace Pokemon.Core.Serialization;
@@ -84,27 +83,6 @@ public sealed class PokemonWriter
 
 		WriteInt32(bytes.Length);
 		WriteSpan(bytes);
-	}
-
-	public void WriteVector2(Vector2 value)
-	{
-		WriteFloat(value.X);
-		WriteFloat(value.Y);
-	}
-
-	public void WriteVector3(Vector3 value)
-	{
-		WriteFloat(value.X);
-		WriteFloat(value.Y);
-		WriteFloat(value.Z);
-	}
-
-	public void WriteVector4(Vector4 value)
-	{
-		WriteFloat(value.X);
-		WriteFloat(value.Y);
-		WriteFloat(value.Z);
-		WriteFloat(value.W);
 	}
 
 	public void WriteEnum<TEnum>(TEnum value)
