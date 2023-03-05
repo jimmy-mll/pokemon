@@ -1,10 +1,12 @@
 ﻿using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
+using Microsoft.Extensions.Logging;
 using Pokemon.Core.Network.Dispatching;
 using Pokemon.Core.Network.Framing;
 using Pokemon.Core.Network.Infrastructure;
 using Pokemon.Core.Network.Metadata;
+using Serilog;
 
 namespace Pokemon.Core.Network.Transport;
 
@@ -16,6 +18,7 @@ public abstract class BaseSession : IAsyncDisposable
 	private readonly IMessageParser _messageParser;
 	private readonly IDuplexPipe _pipe;
 	private readonly Socket _socket;
+	private readonly IBaseServer _server;
 
 	private bool _disposed;
 	private string? _sessionId;
@@ -42,10 +45,12 @@ public abstract class BaseSession : IAsyncDisposable
 	/// <param name="messageDispatcher">The message dispatcher.</param>
 	protected BaseSession(
 		Socket socket,
+		IBaseServer server,
 		IMessageParser messageParser,
 		IMessageDispatcher messageDispatcher)
 	{
 		_socket = socket;
+		_server = server;
 		_messageParser = messageParser;
 		_messageDispatcher = messageDispatcher;
 		_cts = new CancellationTokenSource();
@@ -87,36 +92,26 @@ public abstract class BaseSession : IAsyncDisposable
 		{
 			while (!_cts.IsCancellationRequested)
 			{
-				var readResult = await _pipe.Input.ReadAsync(_cts.Token).ConfigureAwait(false);
+                var readResult = await _pipe.Input.ReadAsync(_cts.Token).ConfigureAwait(false);
+                var buffer = readResult.Buffer;
 
-				if (readResult.IsCanceled)
-					break;
+                if (readResult.IsCanceled)
+                    break;
 
-				var buffer = readResult.Buffer;
-
-				try
-				{
-					if (_messageParser.TryDecodeMessage(buffer, out var message))
-						await _messageDispatcher.DispatchServerAsync(this, message).ConfigureAwait(false);
-
-					if (readResult.IsCompleted)
-					{
-						if (!buffer.IsEmpty)
-							throw new InvalidOperationException("Incomplete message received");
-
-						break;
-					}
-				}
+                try
+                {
+                    if (_messageParser.TryDecodeMessage(buffer, out PokemonMessage? message))
+                        await _messageDispatcher.DispatchServerAsync(_server, this, message);
+                }
 				finally
 				{
-					_pipe.Input.AdvanceTo(buffer.Start, buffer.End);
-				}
-			}
-		}
-		catch (Exception e) when (e is OperationCanceledException or ObjectDisposedException)
-		{
-			/* ignore */
-		}
+                    _pipe.Input.AdvanceTo(buffer.End, buffer.End);
+                }
+            }
+        }
+		catch (Exception e) when (e is OperationCanceledException or ObjectDisposedException) { }
+		catch (IOException) { Disconnect(); }
+		catch (Exception e) { Log.Logger.Error($"An error occured. {e.GetType().Name}: {e.Message} {e.StackTrace}."); }
 	}
 
 	/// <summary>Asynchronously sends a message to the remote endpoint.</summary>

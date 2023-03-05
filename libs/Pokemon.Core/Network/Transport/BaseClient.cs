@@ -110,31 +110,40 @@ public abstract class BaseClient : IAsyncDisposable
 		{
 			while (!_cts.IsCancellationRequested)
 			{
-				var readResult = await _pipe.Input.ReadAsync(_cts.Token).ConfigureAwait(false);
+                var readResult = await _pipe.Input.ReadAsync(_cts.Token).ConfigureAwait(false);
+                var buffer = readResult.Buffer;
 
-				if (readResult.IsCanceled)
-					break;
+                if (readResult.IsCanceled)
+                    break;
 
-				var buffer = readResult.Buffer;
+                try
+                {
+                    if (_messageParser.TryDecodeMessage(buffer, out PokemonMessage? message))
+                        await _messageDispatcher.DispatchClientAsync(this, message);
+                }
+                finally
+                {
+                    _pipe.Input.AdvanceTo(buffer.End, buffer.End);
+                }
 
-				try
-				{
-					if (_messageParser.TryDecodeMessage(buffer, out var message))
-						await _messageDispatcher.DispatchClientAsync(this, message).ConfigureAwait(false);
+                /*				try
+                                {
+                                    if (_messageParser.TryDecodeMessage(buffer, out var message))
+                                        await _messageDispatcher.DispatchClientAsync(this, message).ConfigureAwait(false);
 
-					if (readResult.IsCompleted)
-					{
-						if (!buffer.IsEmpty)
-							throw new InvalidOperationException("Incomplete message received");
+                                    if (readResult.IsCompleted)
+                                    {
+                                        if (!buffer.IsEmpty)
+                                            throw new InvalidOperationException("Incomplete message received");
 
-						break;
-					}
-				}
-				finally
-				{
-					_pipe.Input.AdvanceTo(buffer.Start, buffer.End);
-				}
-			}
+                                        break;
+                                    }
+                                }
+                                finally
+                                {
+                                    _pipe.Input.AdvanceTo(buffer.Start, buffer.End);
+                                }*/
+            }
 		}
 		catch (Exception e) when (e is OperationCanceledException or ObjectDisposedException)
 		{
