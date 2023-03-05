@@ -1,17 +1,21 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pokemon.Core.Extensions;
 using Pokemon.Core.Network.Dispatching;
 using Pokemon.Core.Network.Framing;
+using Pokemon.Core.Network.Metadata;
 using Pokemon.Core.Network.Options;
 
 namespace Pokemon.Core.Network.Transport;
 
+public interface IBaseServer { }
+
 /// <summary>Represents a tcp server that can be used to listen for incoming connections.</summary>
 /// <typeparam name="TSession">The type of the session.</typeparam>
-public abstract class BaseServer<TSession>
+public abstract class BaseServer<TSession> : IBaseServer
 	where TSession : BaseSession
 {
 	private readonly CancellationTokenSource _cts;
@@ -20,6 +24,8 @@ public abstract class BaseServer<TSession>
 	private readonly IMessageParser _messageParser;
 	private readonly ServerOptions _options;
 	private readonly Socket _socket;
+
+	private readonly List<TSession> _sessions;
 
 	/// <summary>Initializes a new instance of the <see cref="BaseServer{TSession}" /> class.</summary>
 	/// <param name="messageParser">The message parser.</param>
@@ -34,6 +40,7 @@ public abstract class BaseServer<TSession>
 		_messageDispatcher = messageDispatcher;
 		_logger = logger;
 		_options = options.Value;
+		_sessions = new List<TSession>();
 	}
 
 	/// <summary>Starts the server asynchronously.</summary>
@@ -60,6 +67,7 @@ public abstract class BaseServer<TSession>
 			var sessionSocket = await _socket.AcceptAsync(_cts.Token).ConfigureAwait(false);
 
 			var session = CreateSession(sessionSocket, _messageParser, _messageDispatcher);
+			_sessions.Add(session);
 
 			OnSessionConnectedAsync(session)
 				.ContinueWith(_ => session.ReceiveAsync(), _cts.Token)
@@ -71,6 +79,11 @@ public abstract class BaseServer<TSession>
 				.FireAndForget();
 		}
 	}
+
+	public async ValueTask BroadcastMessageAsync(PokemonMessage message)
+	{
+		await Extensions.TaskExtensions.WhenAll(_sessions.Select(x => x.SendAsync(message)));
+    }
 
 	/// <summary>Initializes a new instance of the <see cref="TSession" /> class.</summary>
 	/// <param name="socket">The bound socket.</param>
@@ -90,6 +103,7 @@ public abstract class BaseServer<TSession>
 	/// <param name="session">The session will be disconnected.</param>
 	protected virtual Task OnSessionDisconnectedAsync(TSession session)
 	{
+		_sessions.Remove(session);
 		_logger.LogInformation("Session ({Name}) disconnected from {EndPoint}", session, session.RemoteEndPoint);
 		return Task.CompletedTask;
 	}

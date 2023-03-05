@@ -12,7 +12,7 @@ namespace Pokemon.Core.Network.Dispatching;
 /// <inheritdoc />
 public class MessageDispatcher : IMessageDispatcher
 {
-	private static readonly Type SessionHandlerType = typeof(SessionHandler<,>);
+	private static readonly Type SessionHandlerType = typeof(SessionHandler<,,>);
 	private static readonly Type ClientHandlerType = typeof(ClientHandler<,>);
 	private readonly ConcurrentDictionary<ushort, Type> _clientHandlers;
 	private readonly ILogger<MessageDispatcher> _logger;
@@ -65,7 +65,7 @@ public class MessageDispatcher : IMessageDispatcher
 		{
 			var parameters = type.BaseType!.GetGenericArguments();
 
-			var messageType = parameters[1];
+			var messageType = parameters.Last();
 
 			var messageId = Convert.ToUInt16(messageType.GetField("Identifier")?.GetValue(null));
 
@@ -75,7 +75,7 @@ public class MessageDispatcher : IMessageDispatcher
 	}
 
 	/// <inheritdoc />
-	public async Task DispatchServerAsync(BaseSession session, PokemonMessage message)
+	public async Task DispatchServerAsync(IBaseServer server, BaseSession session, PokemonMessage message)
 	{
 		if (!_messageFactory.TryGetMessageName(message.MessageId, out var messageName))
 		{
@@ -93,7 +93,7 @@ public class MessageDispatcher : IMessageDispatcher
 
 		try
 		{
-			await handler.Delegate(session, message).ConfigureAwait(false);
+			await handler.Delegate(server, session, message).ConfigureAwait(false);
 
 			_logger.LogInformation("Dispatched message {MessageName} to {HandlerName}", messageName, type.Name);
 		}

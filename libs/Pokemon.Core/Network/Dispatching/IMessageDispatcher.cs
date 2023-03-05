@@ -19,7 +19,7 @@ public interface IMessageDispatcher
 	/// <param name="session">The session that is associated with the message.</param>
 	/// <param name="message">The message that is being dispatched.</param>
 	/// <returns>A result that represents the dispatch operation.</returns>
-	Task DispatchServerAsync(BaseSession session, PokemonMessage message);
+	Task DispatchServerAsync(IBaseServer server, BaseSession session, PokemonMessage message);
 
 	/// <summary>Synchronously invokes the specified message delegate.</summary>
 	/// <param name="client">The client that is associated with the message.</param>
