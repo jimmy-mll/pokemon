@@ -7,7 +7,7 @@ namespace Pokemon.Server.Network;
 
 public sealed class PokemonSession : BaseSession
 {
-	public PokemonSession(Socket socket, IMessageParser messageParser, IMessageDispatcher messageDispatcher) : base(socket, messageParser, messageDispatcher)
+	public PokemonSession(Socket socket, IBaseServer server, IMessageParser messageParser, IMessageDispatcher messageDispatcher) : base(socket, server, messageParser, messageDispatcher)
 	{
 	}
 }

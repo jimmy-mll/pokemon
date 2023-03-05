@@ -7,11 +7,11 @@ using Pokemon.Server.Network;
 
 namespace Pokemon.Server.Handlers.Authentication;
 
-public sealed class AuthenticationHandler : SessionHandler<PokemonSession, IdentificationRequestMessage>
+public sealed class AuthenticationHandler : SessionHandler<PokemonServer, PokemonSession, IdentificationRequestMessage>
 {
-	protected override async Task HandleAsync(PokemonSession session, IdentificationRequestMessage message)
+	protected override async Task HandleAsync(PokemonServer server, PokemonSession session, IdentificationRequestMessage message)
 	{
-		var decryptedPassword = Encoding.UTF8.GetString(MD5.HashData(Convert.FromBase64String(message.Password)));
+		var decryptedPassword = message.Password;//Marche pas: Encoding.UTF8.GetString(MD5.HashData(Convert.FromBase64String(message.Password)));
 
 		const string expectedPassword = "password";
 
@@ -22,6 +22,6 @@ public sealed class AuthenticationHandler : SessionHandler<PokemonSession, Ident
 			return;
 		}
 
-		await session.SendAsync(new IdentificationSuccessMessage());
+		await session.SendAsync(new IdentificationSuccessMessage(session.SessionId));
 	}
 }

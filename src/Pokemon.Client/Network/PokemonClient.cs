@@ -14,9 +14,10 @@ namespace Pokemon.Client.Network;
 
 public sealed class PokemonClient : BaseClient
 {
-	public string Username { get; set; } = string.Empty;
+	public string Id { get; set; }
 
-	public string Password { get; set; } = string.Empty;
+	public string Username { get; set; }
+	public string Password { get; set; }
 
 	public PokemonClient(IMessageParser messageParser, IMessageDispatcher messageDispatcher, ILogger<BaseClient> logger, IOptions<ClientOptions> options)
 		: base(messageParser, messageDispatcher, logger, options)
@@ -25,8 +26,7 @@ public sealed class PokemonClient : BaseClient
 
 	protected override async ValueTask OnConnectedAsync()
 	{
-		Username = "Aerafal";
-		var encryptedPassword = Convert.ToBase64String(MD5.HashData(Encoding.UTF8.GetBytes(Password)));
+		var encryptedPassword = Password;//Marche pas: Convert.ToBase64String(MD5.HashData(Encoding.UTF8.GetBytes(Password)));
 
 		await base.OnConnectedAsync();
 		await SendAsync(new IdentificationRequestMessage(Username, encryptedPassword));

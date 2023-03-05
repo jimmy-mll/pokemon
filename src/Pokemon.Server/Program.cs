@@ -8,6 +8,7 @@ using Pokemon.Core.Network.Framing;
 using Pokemon.Core.Network.Options;
 using Pokemon.Protocol.Messages.Authentication;
 using Pokemon.Server.Handlers.Authentication;
+using Pokemon.Server.Handlers.Spawning;
 using Pokemon.Server.Network;
 using Serilog;
 
@@ -28,6 +29,7 @@ builder.Services
 	.AddSingleton<IMessageDispatcher, MessageDispatcher>()
 	.AddSingleton<PokemonServer>()
 	.AddSingleton<AuthenticationHandler>()
+	.AddSingleton<NewPlayerSpawnRequestHandler>()
 	.AddSingleton<PokemonServer>()
 	.Configure<ServerOptions>(builder.Configuration.GetRequiredSection("Network"));
 
