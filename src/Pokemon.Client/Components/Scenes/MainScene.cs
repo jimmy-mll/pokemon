@@ -23,21 +23,9 @@ using Pokemon.Monogame.Services.Keyboard;
 
 namespace Pokemon.Client.Components.Scenes;
 
-public enum PlayerDirection
-{
-	Left,
-	Right,
-	Up,
-	Down
-}
 
 public class MainScene : GameScene
 {
-	private const float WalkSpeed = 150f;
-	private const float RunSpeed = 250f;
-
-	private PlayerDirection _playerDirection;
-
 	private readonly IKeyboardService _keyboardService;
 	private readonly IGameNetworkPipeline _pipeline;
 
@@ -53,12 +41,12 @@ public class MainScene : GameScene
 		{
 			await _tcs.Task;
 
-			this.SpawnPlayer(e.SpawnedPlayer.Id, e.SpawnedPlayer.Position);
+			this.SpawnPlayer(true, e.SpawnedPlayer.Id, e.SpawnedPlayer.Position);
 
 			for (int i = 0; i < e.OtherPlayers.Count; i++)
 			{
 				var item = e.OtherPlayers[i];
-				this.SpawnPlayer(item.Id, item.Position);
+				this.SpawnPlayer(false, item.Id, item.Position);
 			}
 		});
 
@@ -66,7 +54,7 @@ public class MainScene : GameScene
 		{
 			await _tcs.Task;
 
-			this.SpawnPlayer(e.SpawnedPlayer.Id, e.SpawnedPlayer.Position);
+			this.SpawnPlayer(false, e.SpawnedPlayer.Id, e.SpawnedPlayer.Position);
 		});
 
 		_pipeline.RegisterNotification<OtherClientUnspawnedEventArgs>(NotificationType.OtherClientUnspawnedNotification, async e =>
@@ -93,14 +81,13 @@ public class MainScene : GameScene
 		});
 	}
 
-	private void SpawnPlayer(string id, Position position)
+	private void SpawnPlayer(bool currentPlayer, string id, Position position)
 	{
         var spriteRenderer = new SpriteRenderer();
+		var animationController = new AnimationController(spriteRenderer, GameAnimations.PlayerIdle["Down"]);
 
-        _playerDirection = PlayerDirection.Down;
-        var animationController = new AnimationController(spriteRenderer, GameAnimations.PlayerIdle["Down"]);
-
-        World.Create<IRenderer, AnimationController, Position, Scale, NetworkPlayerComponent>(spriteRenderer, animationController, position, new Scale(2.5f, 2.5f), new NetworkPlayerComponent(id));
+		if (!currentPlayer) World.Create<IRenderer, AnimationController, Position, Scale, NetworkPlayerComponent>(spriteRenderer, animationController, position, new Scale(2.5f, 2.5f), new NetworkPlayerComponent(id, currentPlayer));
+		else World.Create<IRenderer, AnimationController, Position, Scale, NetworkPlayerComponent, CharacterController>(spriteRenderer, animationController, position, new Scale(2.5f, 2.5f), new NetworkPlayerComponent(id, currentPlayer), new CharacterController());
     }
 
 	protected override void OnUpdate(GameTime gameTime)
@@ -115,60 +102,11 @@ public class MainScene : GameScene
         });
 
 		queryDesc = new QueryDescription()
-			.WithAll<IRenderer, AnimationController, Position, Scale>();
+			.WithAll<AnimationController, Position, CharacterController>();
 
-		World.Query(queryDesc, (ref Position position, ref AnimationController animationController) =>
+		World.Query(queryDesc, (ref CharacterController controller, ref Position position,  ref AnimationController animationController) =>
 		{
-			bool isRunning = false;
-
-			Vector2 input = Vector2.Zero;
-			var moveSpeed = WalkSpeed;
-
-			foreach (var pressedKey in Keyboard.GetState().GetPressedKeys())
-			{
-				var mapping = _keyboardService.GetMappingForKey(pressedKey);
-
-				switch (mapping)
-				{
-					case KeyboardMappings.Up:
-						_playerDirection = PlayerDirection.Up;
-						input.Y = -1;
-						break;
-
-					case KeyboardMappings.Down:
-                        _playerDirection = PlayerDirection.Down;
-                        input.Y = 1;
-                        break;
-					
-					case KeyboardMappings.Left:
-						_playerDirection = PlayerDirection.Left;
-						input.X = -1;
-						break;
-
-					case KeyboardMappings.Right:
-						_playerDirection = PlayerDirection.Right;
-						input.X = 1;
-						break;
-
-					case KeyboardMappings.Run:
-						moveSpeed = RunSpeed;
-						isRunning = true;
-						break;
-
-					case KeyboardMappings.None:
-					default:
-						continue;
-				}
-			}
-
-			position += input * moveSpeed * dt;
-
-			if (input == Vector2.Zero) animationController?.Play(GameAnimations.PlayerIdle[_playerDirection.ToString()]);
-			else
-			{
-				if (isRunning) animationController?.Play(GameAnimations.PlayerRun[_playerDirection.ToString()]);
-                else animationController?.Play(GameAnimations.PlayerWalk[_playerDirection.ToString()]);
-            }
+			controller.Update(ref position, animationController, _keyboardService, gameTime);
 		});
 
 		base.OnUpdate(gameTime);

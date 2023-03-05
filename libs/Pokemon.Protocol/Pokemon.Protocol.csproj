@@ -6,12 +6,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Datacenter"/>
-        <Folder Include="Types"/>
+        <Folder Include="Datacenter" />
+        <Folder Include="Types" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Pokemon.Core\Pokemon.Core.csproj"/>
+      <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Pokemon.Core\Pokemon.Core.csproj" />
     </ItemGroup>
 
 </Project>

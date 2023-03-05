@@ -8,17 +8,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\libs\Pokemon.Protocol\Pokemon.Protocol.csproj"/>
+        <ProjectReference Include="..\..\libs\Pokemon.Protocol\Pokemon.Protocol.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Handlers"/>
-        <Folder Include="Models"/>
-        <Folder Include="Services"/>
+        <Folder Include="Models" />
+        <Folder Include="Services" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="appsettings.json"/>
+        <None Remove="appsettings.json" />
         <Content Include="appsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

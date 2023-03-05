@@ -33,10 +33,7 @@
         <ProjectReference Include="..\..\libs\Pokemon.Protocol\Pokemon.Protocol.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Components\" />
-        <Folder Include="Handlers\" />
-        <Folder Include="Models" />
-        <Folder Include="Notifications" />
+        <Folder Include="Models\" />
     </ItemGroup>
     <ItemGroup>
       <None Update="Data\Animations\Player\idle_animation.json">
