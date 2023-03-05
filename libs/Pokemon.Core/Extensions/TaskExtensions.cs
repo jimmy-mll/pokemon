@@ -51,4 +51,17 @@ public static class TaskExtensions
 			Debug.WriteLine(e, "TaskExtensions");
 		}
 	}
+
+	public static async ValueTask WhenAll(this IEnumerable<ValueTask> tasks)
+	{
+		ArgumentNullException.ThrowIfNull(tasks);
+
+		var enumerator = tasks.GetEnumerator();
+
+		while (enumerator.MoveNext())
+		{
+            var task = enumerator.Current;
+            await task.ConfigureAwait(false);
+        }
+	}
 }
