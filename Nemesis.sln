@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{CAEA1633-8068-49A1-9B62-0BA68F506AE5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{327D9EDF-79D8-4ECB-B5A7-9F20324EB7D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{CAD96A5F-C3D3-45F1-AF90-3FD570828C68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nemesis.Core", "libs\Nemesis.Core\Nemesis.Core.csproj", "{7AC67C65-FDBA-416D-A230-49E2DA798952}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nemesis.Protocol", "libs\Nemesis.Protocol\Nemesis.Protocol.csproj", "{8D8EE2BB-8EE0-4E89-88FC-992937492800}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nemesis.MonoGame", "libs\Nemesis.MonoGame\Nemesis.MonoGame.csproj", "{A4CD6BD5-F6E1-4DE7-8751-F1810E48C350}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7AC67C65-FDBA-416D-A230-49E2DA798952} = {CAEA1633-8068-49A1-9B62-0BA68F506AE5}
+		{8D8EE2BB-8EE0-4E89-88FC-992937492800} = {CAEA1633-8068-49A1-9B62-0BA68F506AE5}
+		{A4CD6BD5-F6E1-4DE7-8751-F1810E48C350} = {CAEA1633-8068-49A1-9B62-0BA68F506AE5}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7AC67C65-FDBA-416D-A230-49E2DA798952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AC67C65-FDBA-416D-A230-49E2DA798952}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AC67C65-FDBA-416D-A230-49E2DA798952}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AC67C65-FDBA-416D-A230-49E2DA798952}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D8EE2BB-8EE0-4E89-88FC-992937492800}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D8EE2BB-8EE0-4E89-88FC-992937492800}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D8EE2BB-8EE0-4E89-88FC-992937492800}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D8EE2BB-8EE0-4E89-88FC-992937492800}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4CD6BD5-F6E1-4DE7-8751-F1810E48C350}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4CD6BD5-F6E1-4DE7-8751-F1810E48C350}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4CD6BD5-F6E1-4DE7-8751-F1810E48C350}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4CD6BD5-F6E1-4DE7-8751-F1810E48C350}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
