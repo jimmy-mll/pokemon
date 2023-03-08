@@ -65,7 +65,7 @@ public sealed class BinaryWriter
 	/// <typeparam name="T">The type of the structure.</typeparam>
 	/// <exception cref="ArgumentException">When <typeparamref name="T" /> is a reference type.</exception>
 	/// <exception cref="IndexOutOfRangeException">When the buffer is too small to write the requested type.</exception>
-	public void Write<T>(T[] values) where T : struct
+	public void WriteArray<T>(T[] values) where T : struct
 	{
 		if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
 			throw new ArgumentException("T must be a value type.", nameof(values));
@@ -105,7 +105,7 @@ public sealed class BinaryWriter
 		var bytes = encoding.GetBytes(value);
 
 		Write(bytes.Length);
-		Write(bytes);
+		WriteArray(bytes);
 	}
 
 	/// <summary>

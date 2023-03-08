@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -11,7 +12,13 @@ public sealed class BinaryReader
 {
 	private readonly ReadOnlyMemory<byte> _buffer;
 
-	private int _position;
+	public int Length =>
+		_buffer.Length;
+
+	public int Position { get; private set; }
+
+	public int Remaining =>
+		_buffer.Length - Position;
 
 	/// <summary>
 	///     Initializes a new instance of the <see cref="BinaryReader" /> class.
@@ -19,6 +26,13 @@ public sealed class BinaryReader
 	/// <param name="buffer">The buffer to read into.</param>
 	public BinaryReader(ReadOnlyMemory<byte> buffer) =>
 		_buffer = buffer;
+
+	/// <summary>
+	///     Initializes a new instance of the <see cref="BinaryReader" /> class.
+	/// </summary>
+	/// <param name="sequence">The sequence to convert in <see cref="ReadOnlyMemory{T}" />.</param>
+	public BinaryReader(ReadOnlySequence<byte> sequence) =>
+		_buffer = SequenceMarshal.TryGetReadOnlyMemory(sequence, out var memory) ? memory : sequence.ToArray();
 
 	/// <summary>
 	///     Reads a structure of type <typeparamref name="T" /> from the buffer.
@@ -34,12 +48,12 @@ public sealed class BinaryReader
 
 		var size = Unsafe.SizeOf<T>();
 
-		if (_buffer.Length - _position < size)
+		if (Remaining < size)
 			throw new IndexOutOfRangeException("The buffer is too small to read the requested type.");
 
-		var result = Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(_buffer.Span.Slice(_position, size)));
+		var result = Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(_buffer.Span.Slice(Position, size)));
 
-		_position += size;
+		Position += size;
 
 		return result;
 	}
@@ -64,17 +78,17 @@ public sealed class BinaryReader
 		var sizeOfT = Unsafe.SizeOf<T>();
 		var sizeOfArray = sizeOfT * sizeOfResult;
 
-		if (_buffer.Length - _position < sizeOfArray)
+		if (Remaining < sizeOfArray)
 			throw new IndexOutOfRangeException("The buffer is too small to read the requested type.");
 
 		var result = new T[sizeOfResult];
 
 		Unsafe.CopyBlockUnaligned(
 			ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(result.AsSpan())),
-			ref MemoryMarshal.GetReference(_buffer.Span.Slice(_position, sizeOfArray)),
+			ref MemoryMarshal.GetReference(_buffer.Span.Slice(Position, sizeOfArray)),
 			(uint)sizeOfArray);
 
-		_position += sizeOfArray;
+		Position += sizeOfArray;
 
 		return result;
 	}
@@ -91,12 +105,12 @@ public sealed class BinaryReader
 
 		var length = Read<int>();
 
-		if (_buffer.Length - _position < length)
+		if (Remaining < length)
 			throw new IndexOutOfRangeException("The buffer is too small to read the requested type.");
 
-		var result = encoding.GetString(_buffer.Span.Slice(_position, length));
+		var result = encoding.GetString(_buffer.Span.Slice(Position, length));
 
-		_position += length;
+		Position += length;
 
 		return result;
 	}
