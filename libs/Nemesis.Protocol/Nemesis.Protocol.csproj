@@ -7,7 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Nemesis.Core\Nemesis.Core.csproj" />
+        <ProjectReference Include="..\Nemesis.Core\Nemesis.Core.csproj" />
+        <ProjectReference Include="..\Nemesis.SourceGenerators\Nemesis.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Enums" />
+      <Folder Include="Messages" />
+      <Folder Include="Types" />
     </ItemGroup>
 
 </Project>
